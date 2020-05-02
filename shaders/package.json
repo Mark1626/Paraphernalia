@@ -1,0 +1,21 @@
+{
+  "name": "shaders",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "scripts": {
+    "start": "parcel index.html"
+  },
+  "dependencies": {
+    "a-big-triangle": "^1.0.3",
+    "canvas-fit": "^1.5.0",
+    "codemirror": "^5.53.2",
+    "defaultcss": "^1.1.1",
+    "frame-debounce": "^1.0.1",
+    "gl-shader": "^4.2.1",
+    "gl-shader-errors": "^1.0.3",
+    "glsl-tokenizer": "^2.1.5",
+    "parcel": "^1.12.4",
+    "unescape": "^1.0.1"
+  }
+}
