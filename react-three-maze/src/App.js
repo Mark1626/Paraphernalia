@@ -5,6 +5,7 @@ import Floor from "./components/Floor";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import Maze from "./components/Maze";
 import Column from "./components/Column";
+import { VRButton } from 'three/examples/jsm/webxr/VRButton.js';
 
 extend({ OrbitControls });
 
@@ -43,6 +44,7 @@ export default () => {
       camera={camera}
       vr
       onCreated={({ gl, camera }) => {
+        document.body.appendChild(VRButton.createButton(gl))
         gl.toneMapping = THREE.Uncharted2ToneMapping;
         gl.setClearAlpha(1);
       }}
