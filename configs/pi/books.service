@@ -1,0 +1,11 @@
+[Unit]
+Description=Debook Client
+After=network.target
+
+[Service]
+WorkingDirectory=/home/pi
+ExecStart=/home/pi/services/de-books-client/server /home/pi/services/de-books-client
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target

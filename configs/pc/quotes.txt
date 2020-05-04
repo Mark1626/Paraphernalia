@@ -1,0 +1,53 @@
+- I'm fairly convinced the main difference between a senior dev and a junior dev is the senior knows how to hide the evidence.
+- A monad is just a monoid in the category of endofunctors
+- x86 has way too many instructions
+- Psst, it's :q
+- Why do programmers always mix up Halloween and Christmas? Because Oct 31 == Dec 25
+- When you stare into Void, i3 stares back into you
+- He never lost heart, and never looked back. He marched in one direction, and that direction was dead ahead.
+- Non Visum Vindere
+- You miss 100% of the shots you don't take
+- Eyes are Useless when the Mind is Blind
+- life is 10% what happens to me and 90% how I react to it
+- Expect the Unexpected
+- I went to a bookstore and asked the saleswoman, “where’s the self-help section?” She said if she told me, it would defeat the purpose.
+- To live and let live
+- 無
+- 僧問：狗子還有佛性也無？ 師云：無。
+- 仏に逢えば仏を殺せ
+- 逢佛殺佛
+- In whatever way you identify with Me, in the same way do I carry out your wishes
+- Never attribute to malice that which is adequately explained by stupidity.
+- Pluralitas non est ponenda sine necessitate
+- What can be asserted without evidence can be dismissed without evidence
+- Know thyself
+- Don't ask a question you know the answer to
+- Don't ask a question you don't want to know the answer to
+- Don't ask a question you don't want to be asked
+- MYSQL Server 5.5.45 secretly runs two parallel databases for people who say 'S-Q-L' and 'SEQUEL'
+- Turns out Cloud is just other people's computers.
+- An attacker can execute malicious code on their own machine and no one can stop them
+- At the cafe on third street, the post-it note with the WiFi password is visible from the sidewalk
+- Programs are meant to be read by humans and only incidentally for computers to execute
+- Apps ate the world, the web ate apps, and JavaScript ate the web.
+- All things betray thee, who betrayest Me.
+- Naught shelters thee, who wilt not shelter Me.
+- Sambhavame Yuge Yuge
+- The noblest pleasure is the joy of understanding
+- Denial is the reason for suffering
+- May you do good and not evil
+- May you find forgiveness for yourself and forgive others
+- May you share freely, never taking more than you give
+- Denial is the darkest when you live in a hole
+- I'm not your sin
+- I will not subject myself to selected predictable choices
+- Live, live, live, life
+- We are so demanding when we want the truth
+- Your job is not to be the biggest know-it-all or fastest coder in the team. Your job is to foster an environment where good work happens
+- I saw it as something that people did when they wanted to… I don’t know, I always thought of it as fun.
+- Used WebAssembly today. I'll probably grow a beard and an ugly sweater until tomorrow.
+- Using ancient programming languages for fun and profit.
+- I liked NoSQL better when it was still named COBOL.
+- Syntax highlighting. Because colors.
+- The opposite of 'interesting' is 'colorful'.
+- It is a dark world where all you have are functions, and all you can do is apply them to each other.

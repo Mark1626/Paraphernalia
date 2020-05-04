@@ -1,0 +1,5 @@
+localhost {
+	reverse_proxy /api/* localhost:8081
+
+	file_server /books/*
+}

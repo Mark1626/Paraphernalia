@@ -1,0 +1,52 @@
+[
+  {
+    "character": "W",
+    "color": "#fba058",
+    "title": "Wikipedia, the free encyclopedia",
+    "url": "https://en.wikipedia.org/"
+  },
+  { "title": "", "url": "", "color": "#c9bff4", "character": "-" },
+  { "title": "", "url": "", "color": "#70a4d8", "character": "-" },
+  {
+    "character": "I",
+    "color": "#30dca6",
+    "title": "Inspiring Online",
+    "url": "https://inspiring.online"
+  },
+  {
+    "character": "G",
+    "color": "#ffd1c6",
+    "title": "GitHub",
+    "url": "http://github.com/"
+  },
+  { "title": "", "url": "", "color": "#ffa3bb", "character": "-" },
+  {
+    "character": "C",
+    "color": "#fba058",
+    "title": "CodePen",
+    "url": "http://codepen.io/"
+  },
+  { "title": "", "url": "", "color": "#ffa3bb", "character": "-" },
+  {
+    "title": "Showcase",
+    "url": "https://m4rk9696.github.io/showcase/",
+    "color": "#31cdd4",
+    "character": "S"
+  },
+  { "title": "", "url": "", "color": "#ffa3bb", "character": "-" },
+  { "title": "", "url": "", "color": "#70a4d8", "character": "-" },
+  {
+    "character": "D",
+    "color": "#30dca6",
+    "title": "Docker Hub",
+    "url": "https://hub.docker.com/"
+  },
+  { "title": "", "url": "", "color": "#a3c4fd", "character": "-" },
+  { "title": "", "url": "", "color": "#a3c4fd", "character": "-" },
+  { "title": "", "url": "", "color": "#9de0fc", "character": "-" },
+  { "character": "-", "color": "#70a4d8", "title": "", "url": "" },
+  { "character": "-", "color": "#30dca6", "title": "", "url": "" },
+  { "character": "-", "color": "#9de0fc", "title": "", "url": "" },
+  { "character": "-", "color": "#9de0fc", "title": "", "url": "" },
+  { "character": "-", "color": "#fcf3af", "title": "", "url": "" }
+]
