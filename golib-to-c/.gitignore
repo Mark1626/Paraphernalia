@@ -1,0 +1,4 @@
+*.a
+src/libarith.h
+main
+.vscode
