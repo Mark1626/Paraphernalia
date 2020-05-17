@@ -1,0 +1,14 @@
+{
+  "dependencies": {
+    "react": "^16.13.1",
+    "react-dom": "^16.13.1",
+    "react-three-fiber": "^4.2.4",
+    "three": "^0.116.1"
+  },
+  "devDependencies": {
+    "parcel": "^1.12.4"
+  },
+  "scripts": {
+    "start": "parcel index.html"
+  }
+}
