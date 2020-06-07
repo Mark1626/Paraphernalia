@@ -21,7 +21,7 @@ let data = [
 
 const readLog = async () => {
   const reader = new FileReader();
-  const file = await fetch("http://localhost:5000/temperature.log");
+  const file = await fetch("/temperature.log");
   const content = await file.blob();
 
   reader.readAsText(content, "UTF-8");
