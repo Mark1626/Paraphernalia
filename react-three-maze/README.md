@@ -1,6 +1,10 @@
 # react-three-maze
 
-A procudurally generated maze in THREE JS using `react-three-vr`
+[Home](../README.md){: .button}
+
+> **Status** - Working
+
+A procudurally generated maze in THREE JS using `react-three-fiber`
 
 ## Usage
 

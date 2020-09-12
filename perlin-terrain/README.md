@@ -2,7 +2,7 @@
 
 [Home](../README.md){: .button}
 
-Status - Failed, too tired to debug
+> **Status** - Failed, too tired to debug
 
 ### Tech used
 

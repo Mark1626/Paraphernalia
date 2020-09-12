@@ -1,4 +1,11 @@
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+# Experiment to read QR codes
+
+Wanted to read QR codes in Android so made a PWA
+
+[Home](../README.md){: .button}
+
+> **Status** - Working
+
 
 ## Available Scripts
 

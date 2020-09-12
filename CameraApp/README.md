@@ -1,6 +1,10 @@
 # CameraApp
 Testing HTML Camera API
 
+[Home](../README.md){: .button}
+
+> **Status** - Working
+
 ## Commands
 Command                | Description                                      |
 -----------------------|--------------------------------------------------|
