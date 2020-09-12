@@ -1,0 +1,28 @@
+{
+  "devDependencies": {
+    "@babel/core": "^7.9.6",
+    "@babel/preset-env": "^7.9.6",
+    "babel-jest": "^26.0.1",
+    "jest": "^26.0.1",
+    "parcel": "^1.12.4"
+  },
+  "scripts": {
+    "start": "parcel src/index.html",
+    "test": "jest",
+    "build": "parcel build src/index.html"
+  },
+  "dependencies": {
+    "drei": "^0.0.40",
+    "mitt": "^1.2.0",
+    "noisejs": "^2.1.0",
+    "react": "^16.13.1",
+    "react-dom": "^16.13.1",
+    "react-three-fiber": "^4.2.4",
+    "three": "^0.116.1"
+  },
+  "jest": {
+    "transform": {
+      "^.+\\.[t|j]s$": "babel-jest"
+    }
+  }
+}
