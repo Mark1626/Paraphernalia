@@ -2,10 +2,10 @@
 
 A collection of spikes and snippets that are not big enough for a separate repo
 
-Case studies will be in my [blog]()
-Postgres Performance Studies and Benchmarks will be [here]()
+Case studies will be in my [blog](https://mark1626.github.io/)
+Postgres Performance Studies and Benchmarks will be [here](https://github.com/Mark1626/postgres-benches)
 
-> **Note:** Dependencies may be outdated
+> **Note:** Dependencies may be outdated, I've turned off security advisory for this repo
 
 ### All spikes
 
