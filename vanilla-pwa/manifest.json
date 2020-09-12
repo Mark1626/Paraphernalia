@@ -1,0 +1,13 @@
+{
+  "name": "Vanilla PWA",
+  "short_name": "VPWA",
+  "description": "A small PWA in vanilla JS",
+  "icons": [
+    {
+    }
+  ],
+  "display": "standalone",
+  "background_color": "blue",
+  "theme_color": "lightblue",
+  "start_url": "/index.html"
+}

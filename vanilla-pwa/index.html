@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width">
+    <link rel="stylesheet" href="/index.css">
+    <link rel="manifest" href="/manifest.json">
+    <title>Vanilla PWA</title>
+    <script>
+      if(location.protocol == 'http;') location.protocol = 'https:';
+      if('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('/sw.js')
+      } else {
+        console.warn('Service Werker not supported')
+      }
+    </script>
+    <meta name="theme-color" content="lightblue">
+  </head>
+  <body>
+    <h1>Hello World</h1>
+    PWA Template
+  </body>
+</html>
