@@ -12,7 +12,7 @@ export default ({ position: basePosition, x, y }) => {
           const position = [...basePosition];
           position[0] += x;
           position[2] += y;
-          return <Column position={position} type={col} />;
+          return <Column key={`${x}:${y}`} position={position} type={col} />;
         })
       )}
     </group>
