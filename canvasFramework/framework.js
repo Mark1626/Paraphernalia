@@ -1,4 +1,6 @@
-const canvas = document.getElementById("c");
+const canvas = document.querySelector("canvas");
+canvas.width = 1920;
+canvas.height = 1040;
 const x = canvas.getContext("2d");
 const S = Math.sin;
 const C = Math.cos;
@@ -8,17 +10,38 @@ const R = (r, g, b, a) => {
   return `rgba(${r}, ${g}, ${b}, ${a})`;
 };
 
-let t = 0;
-const starttime = performance.now();
+let time = 0;
+let frame = 0;
+let nextFrameMs = 0;
+const FPS = 60;
+const epsilon = 1.5;
+
+const stats = new Stats();
+document.body.appendChild(stats.dom);
 
 const init = () => {
-  window.requestAnimationFrame(draw);
-};
+  requestAnimationFrame(loop);
+}
 
-const draw = () => {
-  u(t);
-  t = (performance.now() - starttime) / 1000;
-  window.requestAnimationFrame(draw);
-};
+const loop = (frame_time) => {
+  stats.begin();
+  requestAnimationFrame(loop);
+  if (frame_time < nextFrameMs - epsilon) {
+    return;
+  }
+  nextFrameMs = Math.max(nextFrameMs + 1000 / FPS, frame_time);
+
+  time = frame/FPS;
+  if(time * FPS | 0 == frame - 1){
+    time += 0.000001;
+  }
+  frame++;
+
+  u(time);
+  stats.end();
+}
+
+let t = 0;
+const starttime = performance.now();
 
 init();
