@@ -1,7 +1,7 @@
-const canvas = document.querySelector("canvas");
-canvas.width = 1920;
-canvas.height = 1040;
-const x = canvas.getContext("2d");
+const c = document.getElementById("c");
+c.width = 1920;
+c.height = 1040;
+const x = c.getContext("2d");
 const S = Math.sin;
 const C = Math.cos;
 const T = Math.tan;
