@@ -1,0 +1,13 @@
+#!/bin/sh
+echo "Content-type: text/html"
+echo ""
+echo "<p>"
+echo ""
+echo ""
+echo "Environment variables<br/>"
+echo "$QUERY_STRING"|awk -F'&' '{ for(i=1;i<=NF;i++){ split($i,arr,"="); print(arr[1], arr[2]); }}'
+echo ""
+echo "========================================================="
+echo "</p>"
+echo ""
+echo ""
