@@ -1,0 +1,43 @@
+#!/bin/sh
+echo "Content-type: text/html"
+echo ""
+echo "<p>"
+echo ""
+echo ""
+echo "$QUERY_STRING&timestamp=$(date +%s)&list=$SERVICE_LIST"| awk -F'&' ' \
+  BEGIN { \
+    ip = ""; \
+    timestamp = 0; \
+    list = ""; \
+  } \
+  { \
+    for(i=1;i<=NF;i++) { \
+      split($i,arr,"="); \
+      if (arr[1] == "ip") { \
+        ip = arr[2]; \
+      } else if (arr[1] == "timestamp") { \
+        timestamp = arr[2]; \
+      } else if (arr[1] == "list") { \
+        list = arr[2]; \
+      }\
+    } \
+  } \
+  END { \
+    if (ip != "") { \
+      query = "sqlite3 " list " \"insert or replace into service_list (ip, active, updated_at, updated_by) values (" \
+          "\\\"" ip "\\\"," \
+          "1," \
+          timestamp "," \
+          "\\\"request\\\")\""; \
+                                \
+      if(system(query) == 0) { \
+        print "Pass"; \
+      } else { \
+        print "Failed"; \
+      } \
+    } \
+  }'
+echo ""
+echo "</p>"
+echo ""
+echo ""

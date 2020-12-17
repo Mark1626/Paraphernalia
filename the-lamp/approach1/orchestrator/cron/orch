@@ -1,0 +1,3 @@
+# min   hour    day     month   weekday command
+*       18       *       *       *       sh /home/orch/start-blink
+*       21       *       *       *       sh /home/orch/stop-blink

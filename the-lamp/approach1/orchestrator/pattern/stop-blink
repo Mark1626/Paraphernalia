@@ -1,0 +1,2 @@
+#!/bin/sh
+sqlite3 test.db 'select ip from service_list where active=1' | xargs -I {} curl {}/off
