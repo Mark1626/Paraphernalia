@@ -13,6 +13,6 @@ Do not run this, it's a combination of several different spikes
 
 ## Approach 2 - Redis for the rescue
 
-[Approach 1](./approach2/README.md)
+[Approach 2](./approach2/README.md)
 
 - Redis pub/sub for communicating with NodeMCU
