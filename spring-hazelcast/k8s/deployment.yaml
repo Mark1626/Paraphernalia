@@ -1,0 +1,33 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: spring-hazelcast-deployment
+  labels:
+    app: spring-hazelcast
+spec:
+  replicas: 2
+  serviceName: spring-hazelcast-service
+  selector:
+    matchLabels:
+      app: spring-hazelcast
+  template:
+    metadata:
+      labels:
+        app: spring-hazelcast
+    spec:
+      containers:
+        - name: spring-hazelcast
+          image: localhost:5000/spring-hazelcast:1.0.0
+          ports:
+            - containerPort: 8080
+            - containerPort: 5701
+          volumeMounts:
+            - name: hazelcast-storage
+              mountPath: /data/hazelcast
+          env:
+            - name: JAVA_OPTS
+              value: "-Dhazelcast.config=/data/hazelcast/hazelcast.yaml"
+      volumes:
+      - name: hazelcast-storage
+        configMap:
+          name: hazelcast-configuration
