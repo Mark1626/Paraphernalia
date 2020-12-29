@@ -1,0 +1,54 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres-service
+  labels:
+    app: postgres
+spec:
+  ports:
+  - port: 5432
+    name: postgres-service
+  clusterIP: None
+  selector:
+    app: postgres-pod
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: postgres-pod
+spec:
+  containers:
+  - name: postgres
+    image: postgres:12
+    ports:
+    - containerPort: 5432
+      name: http
+    env:
+    - name: POSTGRES_PASSWORD
+      valueFrom:
+        secretKeyRef:
+          name: app-secret
+          key: DB_PASSWORD
+    volumeMounts:
+    - mountPath: /var/lib/postgresql/data
+      name: pg-volume
+  volumes:
+  - name: pg-volume
+    hostPath:
+      path: /files
+---
+apiVersion: networking.k8s.io/v1beta1
+kind: Ingress
+metadata:
+  name: pg-ingress
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+spec:
+  rules:
+  - http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          serviceName: postgres-service
+          servicePort: 5432
