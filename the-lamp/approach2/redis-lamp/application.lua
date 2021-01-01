@@ -30,6 +30,11 @@ redis:subscribe("lamp", function(channel, msg)
   then
     print("Starting blink on pin" .. pin)
     mytimer:start()
+  elseif string.find(msg, "start")
+  then
+    print("Setting gpio pin" .. pin .. " to high")
+    gpio.write(pin, gpio.HIGH)
+    mytimer:stop()
   elseif string.find(msg, "stop")
   then
     print("Setting gpio pin" .. pin .. " to low")
