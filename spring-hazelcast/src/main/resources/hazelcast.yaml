@@ -2,4 +2,8 @@ hazelcast:
   network:
     join:
       multicast:
+        enabled: false
+      kubernetes:
         enabled: true
+        namespace: app
+        service-name: spring-hazelcast-service

@@ -15,19 +15,10 @@ spec:
       labels:
         app: spring-hazelcast
     spec:
+      serviceAccount: hazelcast-service-discovery
       containers:
         - name: spring-hazelcast
           image: localhost:5000/spring-hazelcast:1.0.0
           ports:
             - containerPort: 8080
             - containerPort: 5701
-          volumeMounts:
-            - name: hazelcast-storage
-              mountPath: /data/hazelcast
-          env:
-            - name: JAVA_OPTS
-              value: "-Dhazelcast.config=/data/hazelcast/hazelcast.yaml"
-      volumes:
-      - name: hazelcast-storage
-        configMap:
-          name: spring-hazelcast-configuration
