@@ -9,7 +9,7 @@ Set up two or more application instances
 
 ## Setting up the instances in k8s with kind
 
-- Build the image `make push-image IMAGE_TAG=1.0.2`
+- Build the image `make push-image IMAGE_TAG=1.0.0`
 - Create the k8s cluster with kind `make create-kind`
 - (Optional) Expose port with ingress controller `make ingress-controller`
 - Deploy the services `make deploy-all`

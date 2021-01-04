@@ -24,22 +24,22 @@ switch-context:
 ingress-controller: switch-context
 	kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/master/deploy/static/provider/kind/deploy.yaml
 
-namespace:
+namespace: switch-context
 	kubectl create namespace app
 
-rbac:
+rbac: switch-context
 	kubectl apply -n app -f k8s/$@.yaml
 
-service:
+service: switch-context
 	kubectl apply -n app -f k8s/$@.yaml
 
-deployment:
+deployment: switch-context
 	kubectl apply -n app -f k8s/$@.yaml
 
-config:
+config: switch-context
 	kubectl apply -n app -f k8s/$@.yaml
 
-ingress:
+ingress: switch-context
 	kubectl apply -n app -f k8s/$@.yaml
 
 deploy-all: switch-context rbac service config deployment ingress
