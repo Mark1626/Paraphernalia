@@ -1,5 +1,7 @@
 # Spike to test our Spring Embedded Hazelcast instances
 
+![Spring Hazelcast](./spring-hazelcast.svg)
+
 ## Setting the Cluster 
 
 - `export SPRING_SERVER_PORT=<port-number>`
