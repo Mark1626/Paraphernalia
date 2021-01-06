@@ -1,5 +1,7 @@
 # Spike to test our Spring Embedded Hazelcast instances
 
+You can read a more detailed explaination of the setup [here](https://mark1626.github.io/posts/2021/01/05/distributed-embedded-cache-in-spring-with-hazelcast/)
+
 ![Spring Hazelcast](./spring-hazelcast.svg)
 
 ## Setting the Cluster 
