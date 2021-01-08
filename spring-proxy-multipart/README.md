@@ -20,8 +20,8 @@ Embedded tomcat will immediately reject the request based on the header if the `
 
 We've used Zuul with Spring so the embedded tomcat will do the same
 
-When Zuul receives the request it tries to process it, Tomcat rejects and throws an exception 
-because of the file size, however Zuul received the request and needs to return a 
+Zuul starts to proxy the request, Tomcat rejects it and throws an exception 
+because of the file size, however Zuul needs to return a 
 response so it hits `/error` in the downstream
 
 The rabbit hole goes deeper
