@@ -7,7 +7,7 @@
 
 - `cd spring-zuul`
 - `./gradlew bootRun`
-- `curl --location --request POST 'localhost:8080/upload' \
+- `curl --location --request POST 'localhost:4000/upload' \
 --form 'file=@"/path/to/large/file"'`
 
 ### Behaviour of embedded-tomcat
