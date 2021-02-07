@@ -9,5 +9,5 @@
   "display": "standalone",
   "background_color": "blue",
   "theme_color": "lightblue",
-  "start_url": "/index.html"
+  "start_url": "/"
 }
