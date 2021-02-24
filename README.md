@@ -33,9 +33,55 @@ Postgres Performance Studies and Benchmarks will be [here](https://github.com/Ma
 - [Theming](./theming/README.md)
 - [Vanilla JS PWA with no deps](./vanilla-pwa/README.md)
 - [WebGL Trapezoid](./webglTrapezoid/README.md)
+- [Canvas Framework](./canvasFramework/README.md)
+- [Canvas FPS](./canvasFps/README.md)
 
 ---
 
 #### Servers & Networking
 
 - [Gopher Server in Redis](./gopher/README.md)
+- [Http CGI](./http-cgi/README.md)
+
+---
+
+### Spring
+
+- [Spring Multipart with Zuul](./spring-proxy-multipart/README.md)
+- [Spring Jaeger](./spring-tracing-jaeger/README.md)
+- [Spring Hazelcast](./spring-hazelcast/README.md)
+
+---
+
+#### Crypto
+
+- [Hashcash](./hashcash-test/hashcash-node/README.md)
+
+---
+
+### Infra
+
+- [Kube Kong](./kube-kong/README.md)
+- [Kind k8s Local Volume](./k8s-local-volume/README.md)
+
+---
+
+### DB
+
+- [Sqlite as file storage](./the-void/README.md)
+
+---
+
+### Parsers
+
+[S expr Parser](./s-parser/README.md)
+
+---
+
+### Docker
+
+- [PlantUML Util](./plantuml-util/README.md)
+
+### Misc
+
+- [The lamp](./the-lamp/README.md)
