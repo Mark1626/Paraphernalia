@@ -1,0 +1,25 @@
+#!/usr/bin/env node
+const msg = process.argv[2];
+
+if (!msg) {
+  console.log("No message given");
+  console.log("Usage node main <Message>");
+  process.exit(1);
+}
+
+console.log(`Given message is ${msg}`);
+
+const constrict = (text) => {
+  const textBuffer = Buffer.from(text);
+  let unicode = "";
+  for (const [i, byte] of textBuffer.entries()) {
+    const hex = byte.toString("16");
+    unicode += i & 1 ? `%uDC${hex}` : `%uD8${hex}`;
+  }
+  return unicode;
+};
+
+const unicode = constrict(msg);
+console.log(
+  `eval(unescape(escape(\`${unescape(unicode)}\`).replace(/u../g,'')))`
+);

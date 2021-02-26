@@ -35,6 +35,7 @@ Postgres Performance Studies and Benchmarks will be [here](https://github.com/Ma
 - [WebGL Trapezoid](./webglTrapezoid/README.md)
 - [Canvas Framework](./canvasFramework/README.md)
 - [Canvas FPS](./canvasFps/README.md)
+- [Constrict](./test-constrict/README.md)
 
 ---
 
