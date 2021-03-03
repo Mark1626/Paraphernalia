@@ -1,0 +1,50 @@
+kind: Pod
+apiVersion: v1
+metadata:
+  name: dobby-app
+  labels:
+    app: dobby
+spec:
+  containers:
+  - name: dobby-app
+    image: thecasualcoder/dobby
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: dobby-service
+  annotations:
+    konghq.com/override: kong-ingress-override
+spec:
+  selector:
+    app: dobby
+  ports:
+  - port: 4444
+---
+apiVersion: networking.k8s.io/v1beta1
+kind: Ingress
+metadata:
+  name: kong-ingress
+  annotations:
+    kubernetes.io/ingress.class: kong-ingress
+spec:
+  rules:
+  - http:
+      paths:
+      - path: /
+        backend:
+          serviceName: dobby-service
+          servicePort: 4444
+---
+kind: KongIngress
+apiVersion: configuration.konghq.com/v1
+metadata:
+  name: kong-ingress-override
+  annotations:
+    kubernetes.io/ingress.class: "kong"
+    name: kong-ingress-override
+proxy:
+  protocol: http
+  connect_timeout: 1000
+  read_timeout: 1000
+  write_timeout: 1000

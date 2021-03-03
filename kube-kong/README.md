@@ -1,4 +1,6 @@
-## Spike to set kong in k8s
+## Spike to set kong as the ingress controller in k8s
+
+This also uses `KongIngress` to set timeout for a specific service
 
 - Create local kind cluster with `sh scripts/create-kind.sh`
 - Create the resources `terraform apply`
