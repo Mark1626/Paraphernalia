@@ -1,0 +1,10 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`test button should be able to render 1`] = `
+<div
+  className="sc-bdfBwQ hUNnmt"
+  onClick={[MockFunction]}
+>
+  test
+</div>
+`;
