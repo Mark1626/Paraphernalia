@@ -36,6 +36,7 @@ Postgres Performance Studies and Benchmarks will be [here](https://github.com/Ma
 - [Canvas Framework](./canvasFramework/README.md)
 - [Canvas FPS](./canvasFps/README.md)
 - [Constrict](./test-constrict/README.md)
+- [Visual regression with Loki and Storybook](./visual-regression/README.md)
 
 ---
 
