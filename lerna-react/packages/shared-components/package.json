@@ -1,0 +1,27 @@
+{
+  "name": "shared-components",
+  "version": "1.0.0",
+  "main": "./lib/bundle.js",
+  "files": [
+    "lib"
+  ],
+  "license": "MIT",
+  "type": "module",
+  "dependencies": {
+    "react": "^17.0.2",
+    "react-dom": "^17.0.2"
+  },
+  "scripts": {
+    "babel-build": "babel src --out-dir lib",
+    "bundle": "rollup -c"
+  },
+  "devDependencies": {
+    "@babel/cli": "^7.13.10",
+    "@babel/core": "^7.13.10",
+    "@babel/preset-env": "^7.13.12",
+    "@babel/preset-react": "^7.12.13",
+    "@rollup/plugin-babel": "^5.3.0",
+    "@rollup/plugin-node-resolve": "^11.2.0",
+    "rollup": "^2.42.3"
+  }
+}

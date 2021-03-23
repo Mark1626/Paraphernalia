@@ -1,0 +1,13 @@
+{
+  "name": "lerna-react",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "scripts": {
+    "bundle": "lerna run bundle",
+    "start": "yarn bundle && lerna run start"
+  },
+  "devDependencies": {
+    "lerna": "^4.0.0"
+  }
+}
