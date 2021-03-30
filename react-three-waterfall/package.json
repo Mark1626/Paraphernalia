@@ -1,0 +1,19 @@
+{
+  "name": "react-three-waterfall",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "scripts": {
+    "start": "parcel ./src/index.html"
+  },
+  "devDependencies": {
+    "parcel": "^2.0.0-beta.2"
+  },
+  "dependencies": {
+    "@react-three/drei": "^4.0.1",
+    "@react-three/fiber": "^6.0.1",
+    "react": "^17.0.2",
+    "react-dom": "^17.0.2",
+    "three": "^0.126.1"
+  }
+}

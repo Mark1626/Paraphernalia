@@ -38,6 +38,7 @@ Postgres Performance Studies and Benchmarks will be [here](https://github.com/Ma
 - [Constrict](./test-constrict/README.md)
 - [Visual regression with Loki and Storybook](./visual-regression/README.md)
 - [React Monorepos with Lerna](./lerna-react/README.md)
+- [React Three Waterfall](./react-three-waterfall/README.md)
 
 ---
 
