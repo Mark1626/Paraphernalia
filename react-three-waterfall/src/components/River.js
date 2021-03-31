@@ -37,7 +37,7 @@ export default () => {
           key={`drop-${i}`}
           speed={0}
           position={[Math.random(.1,.9), -20*Math.random(),1+(Math.random()-.5)*.1]}
-          lifespan={(Math.random()*50)+50} />
+          lifespan={-1} />
       )}
     </group>
   )
