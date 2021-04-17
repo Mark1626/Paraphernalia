@@ -87,6 +87,12 @@ Postgres Performance Studies and Benchmarks will be [here](https://github.com/Ma
 
 - [PlantUML Util](./plantuml-util/README.md)
 
+---
+
+### C
+
+- [getopt_long](./getopt-test/README.md)
+
 ### Misc
 
 - [The lamp](./the-lamp/README.md)
