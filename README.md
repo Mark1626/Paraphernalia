@@ -20,6 +20,7 @@ Postgres Performance Studies and Benchmarks will be [here](https://github.com/Ma
 
 - [Using C libs in Go](./clib-to-go/README.md)
 - [Using Go in C](./golib-to-c/README.md)
+- [Lua Module Loaders](./lua-package-loader/README.md)
 
 ---
 
