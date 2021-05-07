@@ -1,0 +1,9 @@
+{
+  "name": "extract-keyframes",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "dependencies": {
+    "gif-frames": "^1.0.1"
+  }
+}
