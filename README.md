@@ -22,6 +22,7 @@ Postgres Performance Studies and Benchmarks will be [here](https://github.com/Ma
 - [Using Go in C](./golib-to-c/README.md)
 - [Lua Module Loaders](./lua-package-loader/README.md)
 - [Function Composition](./function-compose/README.md)
+- [Node Module Extensions](./node-module-extensions/README.md)
 
 ---
 

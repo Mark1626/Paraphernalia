@@ -1,0 +1,9 @@
+{
+  "name": "node-module-extensions",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "dependencies": {
+    "pirates": "^4.0.1"
+  }
+}

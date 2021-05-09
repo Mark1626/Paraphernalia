@@ -1,0 +1,8 @@
+author: mark1626
+server:
+  meta:
+    name: MyApp
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 9376
