@@ -21,6 +21,7 @@ Postgres Performance Studies and Benchmarks will be [here](https://github.com/Ma
 - [Using C libs in Go](./clib-to-go/README.md)
 - [Using Go in C](./golib-to-c/README.md)
 - [Lua Module Loaders](./lua-package-loader/README.md)
+- [Function Composition](./function-compose/README.md)
 
 ---
 
@@ -40,6 +41,8 @@ Postgres Performance Studies and Benchmarks will be [here](https://github.com/Ma
 - [Visual regression with Loki and Storybook](./visual-regression/README.md)
 - [React Monorepos with Lerna](./lerna-react/README.md)
 - [React Three Waterfall](./react-three-waterfall/README.md)
+- [React FPS](./react-three-fps/README.md)
+- [Codepen May 2021 Challenge Week 1](./codepen-may-2021/week1/README.md)
 
 ---
 
