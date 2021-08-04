@@ -105,6 +105,7 @@ Postgres Performance Studies and Benchmarks will be [here](https://github.com/Ma
 ### Embedded Lua
 
 - [Embedded Lua for configuration file](./embedded_lua_settings/)
+- [Embedded Lua](./embedded_lua/)
 
 ---
 
