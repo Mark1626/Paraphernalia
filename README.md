@@ -11,93 +11,103 @@ Postgres Performance Studies and Benchmarks will be [here](https://github.com/Ma
 
 #### ARM
 
-- [Rust Static Server in ARM](./arm-static-server/README.md)
-- [Go Static Server in ARM](./go-static-server/README.md)
+- [Rust Static Server in ARM](./arm-static-server/)
+- [Go Static Server in ARM](./go-static-server/)
 
 ---
 
 #### Languages
 
-- [Using C libs in Go](./clib-to-go/README.md)
-- [Using Go in C](./golib-to-c/README.md)
-- [Lua Module Loaders](./lua-package-loader/README.md)
-- [Function Composition](./function-compose/README.md)
-- [Node Module Extensions](./node-module-extensions/README.md)
+- [Using C libs in Go](./clib-to-go/)
+- [Using Go in C](./golib-to-c/)
+- [Lua Module Loaders](./lua-package-loader/)
+- [Function Composition](./function-compose/)
+- [Node Module Extensions](./node-module-extensions/)
 
 ---
 
 #### Frontend
 
-- [HTML Camera API](./CameraApp/README.md)
-- [Procedural Generated World](./perlin-terrain/README.md)
-- [Reading QR with a React PWA](./react-camera-qr/README.md)
-- [Procedural Generated Maze with WebGL](./react-three-maze/README.md)
-- [GLSL Offline Editor](./shaders/README.md)
-- [Theming](./theming/README.md)
-- [Vanilla JS PWA with no deps](./vanilla-pwa/README.md)
-- [WebGL Trapezoid](./webglTrapezoid/README.md)
-- [Canvas Framework](./canvasFramework/README.md)
-- [Canvas FPS](./canvasFps/README.md)
-- [Constrict](./test-constrict/README.md)
-- [Visual regression with Loki and Storybook](./visual-regression/README.md)
-- [React Monorepos with Lerna](./lerna-react/README.md)
-- [React Three Waterfall](./react-three-waterfall/README.md)
-- [React FPS](./react-three-fps/README.md)
-- [Codepen May 2021 Challenge Week 1](./codepen-may-2021/week1/README.md)
+- [HTML Camera API](./CameraApp/)
+- [Procedural Generated World](./perlin-terrain/)
+- [Reading QR with a React PWA](./react-camera-qr/)
+- [Procedural Generated Maze with WebGL](./react-three-maze/)
+- [GLSL Offline Editor](./shaders/)
+- [Theming](./theming/)
+- [Vanilla JS PWA with no deps](./vanilla-pwa/)
+- [WebGL Trapezoid](./webglTrapezoid/)
+- [Canvas Framework](./canvasFramework/)
+- [Canvas FPS](./canvasFps/)
+- [Constrict](./test-constrict/)
+- [Visual regression with Loki and Storybook](./visual-regression/)
+- [React Monorepos with Lerna](./lerna-react/)
+- [React Three Waterfall](./react-three-waterfall/)
+- [React FPS](./react-three-fps/)
+- [Codepen May 2021 Challenge Week 1](./codepen-may-2021/week1/)
+- [ThreeJS Vanilla Template](./three-template)
 
 ---
 
 #### Servers & Networking
 
-- [Gopher Server in Redis](./gopher/README.md)
-- [Http CGI](./http-cgi/README.md)
+- [Gopher Server in Redis](./gopher/)
+- [Http CGI](./http-cgi/)
+- [Web Socket NodeJS](./web-socket-test/)
 
 ---
 
 ### Spring
 
-- [Spring Multipart with Zuul](./spring-proxy-multipart/README.md)
-- [Spring Jaeger](./spring-tracing-jaeger/README.md)
-- [Spring Hazelcast](./spring-hazelcast/README.md)
+- [Spring Multipart with Zuul](./spring-proxy-multipart/)
+- [Spring Jaeger](./spring-tracing-jaeger/)
+- [Spring Hazelcast](./spring-hazelcast/)
 
 ---
 
 #### Crypto
 
-- [Hashcash](./hashcash-test/hashcash-node/README.md)
-- [Drunken Bishop](./drunken-bishop/README.md)
+- [Hashcash](./hashcash-test/hashcash-node/)
+- [Drunken Bishop](./drunken-bishop/)
 
 ---
 
 ### Infra
 
-- [Kube Kong](./kube-kong/README.md)
-- [Kind k8s Local Volume](./k8s-local-volume/README.md)
+- [Kube Kong](./kube-kong/)
+- [Kind k8s Local Volume](./k8s-local-volume/)
 
 ---
 
 ### DB
 
-- [Sqlite as file storage](./the-void/README.md)
+- [Sqlite as file storage](./the-void/)
 
 ---
 
 ### Parsers
 
-[S expr Parser](./s-parser/README.md)
+[S expr Parser](./s-parser/)
 
 ---
 
 ### Docker
 
-- [PlantUML Util](./plantuml-util/README.md)
+- [PlantUML Util](./plantuml-util/)
 
 ---
 
 ### C
 
-- [getopt_long](./getopt-test/README.md)
+- [getopt_long](./getopt-test/)
+
+---
+
+### Embedded Lua
+
+- [Embedded Lua for configuration file](./embedded_lua_settings/)
+
+---
 
 ### Misc
 
-- [The lamp](./the-lamp/README.md)
+- [The lamp](./the-lamp/)
