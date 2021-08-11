@@ -68,6 +68,7 @@ Postgres Performance Studies and Benchmarks will be [here](https://github.com/Ma
 
 - [Hashcash](./hashcash-test/hashcash-node/)
 - [Drunken Bishop](./drunken-bishop/)
+- [Cuckoo Cycles](./cuckoo-test/)
 
 ---
 
@@ -78,9 +79,16 @@ Postgres Performance Studies and Benchmarks will be [here](https://github.com/Ma
 
 ---
 
+### Documentation
+
+- [Pandoc Book](./pandoc-book/)
+
+---
+
 ### DB
 
 - [Sqlite as file storage](./the-void/)
+- [Exploring Postgres Internals - Part 1](./pg_page/)
 
 ---
 
@@ -93,6 +101,7 @@ Postgres Performance Studies and Benchmarks will be [here](https://github.com/Ma
 ### Docker
 
 - [PlantUML Util](./plantuml-util/)
+- [Perf Image](./perf-image/)
 
 ---
 
