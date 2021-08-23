@@ -16,6 +16,12 @@ Postgres Performance Studies and Benchmarks will be [here](https://github.com/Ma
 
 ---
 
+#### Algo
+
+- [N Queens backtrack](./bktrack/)
+
+---
+
 #### Languages
 
 - [Using C libs in Go](./clib-to-go/)
@@ -108,6 +114,7 @@ Postgres Performance Studies and Benchmarks will be [here](https://github.com/Ma
 ### C
 
 - [getopt_long](./getopt-test/)
+- [Ncurses](./ncurses/)
 
 ---
 
