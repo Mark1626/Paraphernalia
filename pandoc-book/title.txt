@@ -1,0 +1,6 @@
+---
+title: Book Example
+author: Mark
+rights: CC
+language: en-US
+---
