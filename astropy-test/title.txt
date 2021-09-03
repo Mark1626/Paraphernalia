@@ -1,0 +1,6 @@
+---
+title: A Programmer's Guide to the Galaxy
+author: Nimalan
+rights: CC
+language: en-US
+---
