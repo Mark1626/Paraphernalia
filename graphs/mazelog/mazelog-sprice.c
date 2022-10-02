@@ -1,27 +1,30 @@
 /*
  *
- * Solution to mazelog challenge Whorl
- * http://www.mazelog.com/show?L2
+ * Solution to mazelog challenge Crossroad
+ * http://www.mazelog.com/show?TD
  * Author: Nimalan M, mark1626
- * cc -o mazelog-whorl mazelog-whorl.c -O3 -std=c99 -pedantic
+ * cc -o mazelog-sprice mazelog-sprice.c -O3 -std=c99 -pedantic
  */
 #include <stdio.h>
 #include <stdlib.h>
 
-#define W 5
-#define H 5
-#define PATH_LEN 20
+#define W 6
+#define H 6
+#define PATH_LEN 40
 
 /* Describes arrows */
-enum {NN, NE, EE, SE, SS, SW, WW, NW};
+enum {NN, NE, EE, SE, SS, SW, WW, NW };
 
 static const char grid[] = {
-	EE, SW, SE, SW, WW,
-	NN, WW, SW, SW, WW,
-	SE, SE, NW, NW, NE,
-	NE, WW, NE, SE, SS,
-	SW, SS, SE, NW, 00
+	EE, SS, WW, SW, NW, WW,
+	SE, NE, NE, EE, WW, NE,
+	WW, NN, SS, NE, NN, WW,
+	SE, SW, NN, NN, NE, EE,
+	EE, SW, WW, SE, NW, EE,
+	NN, SS, NN, WW, NE, 00
 };
+
+
 
 static const int moves[] = {
 	+0, -1, // NN
@@ -34,9 +37,13 @@ static const int moves[] = {
 	-1, -1  // NW
 };
 
+
+
 static int solve(int *path, int step, int bestn)
 {
-	int dir = step % 4 < 2 ? +1 : -1;
+	// Can be simplified as step % 2 ? -1 : +1;
+	// Keeping this generic as it's also used in another puzzle
+	int dir = step % 2 < 1 ? +1 : -1;
 
 	// Reached the right bottom corner
 	if (path[step] == W*H - 1)
@@ -77,7 +84,10 @@ static int solve(int *path, int step, int bestn)
 	return bestn;
 }
 
+
+
 int main() {
 	int path[PATH_LEN] = {0};
+
 	solve(path, 0, PATH_LEN);
 }
