@@ -43,7 +43,7 @@ static int solve(int *path, int step, int bestn)
 	{
 		for (int i=0; i <= step; i++)
 		{
-			printf("%d%c", path[i] + 1, " \n"[i == step]);
+			printf("%2d%c", path[i] + 1, " \n"[i == step]);
 		}
 		bestn = step;
 	}
@@ -77,7 +77,7 @@ static int solve(int *path, int step, int bestn)
 	return bestn;
 }
 
-int main() {
+int main(void) {
 	int path[PATH_LEN] = {0};
 	solve(path, 0, PATH_LEN);
 }

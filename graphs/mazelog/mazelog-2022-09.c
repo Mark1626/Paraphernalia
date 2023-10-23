@@ -165,7 +165,7 @@ static int solve(int *path, int step, int bestn, int iter_step, int iter_to_chan
 
 
 
-int main() {
+int main(void) {
 	int path[PATH_LEN+1] = {0};
 	solve(path, 0, PATH_LEN, 1, 1);
 }

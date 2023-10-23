@@ -92,7 +92,7 @@ static int solve(int *path, int step, int prevd, int bestn)
   return bestn;
 }
 
-int main()
+int main(void)
 {
   int path[MAX_PATH_LEN + 1] = {0};
   solve(path, 0, grid[0], MAX_PATH_LEN + 1);
