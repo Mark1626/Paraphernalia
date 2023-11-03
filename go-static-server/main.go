@@ -1,23 +1,18 @@
 package main
 
 import (
+	"flag"
 	"log"
 	"net/http"
-	"os"
 )
 
 func main() {
-	if len(os.Args) < 2 {
-		log.Fatal("Please enter a path to serve")
-	}
-	folder := os.Args[1]
+	port := flag.String("p", "8100", "port to serve on")
+	directory := flag.String("d", ".", "the directory of static file to host")
+	flag.Parse()
 
-	fs := http.FileServer(http.Dir(folder))
-	http.Handle("/", fs)
+	http.Handle("/", http.FileServer(http.Dir(*directory)))
 
-	log.Println("Starting static server on ")
-	err := http.ListenAndServe(":3000", nil)
-	if err != nil {
-		log.Fatal(err)
-	}
+	log.Printf("Serving %s on HTTP port: %s\n", *directory, *port)
+	log.Fatal(http.ListenAndServe(":"+*port, nil))
 }

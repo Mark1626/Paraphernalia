@@ -135,3 +135,9 @@ Postgres Performance Studies and Benchmarks will be [here](https://github.com/Ma
 ### Fortran
 
 - [Fortran 101 Spikes](./fortranTest/)
+
+---
+
+### Tex
+
+- [Presentations as Code](./latex-presentation/presentations-as-code.md)
