@@ -141,3 +141,12 @@ Postgres Performance Studies and Benchmarks will be [here](https://github.com/Ma
 ### Tex
 
 - [Presentations as Code](./latex-presentation/presentations-as-code.md)
+
+---
+
+### Shell
+
+- [yaml path autocompletion](./yaml-autocomplete/README.md)
+
+---
+

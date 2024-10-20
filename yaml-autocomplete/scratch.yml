@@ -1,0 +1,18 @@
+kind: database
+type: source
+project: project-name
+salt: my-salt
+encrypt:
+  object:
+    - .company.people.data
+    - .company.employee.data
+  file:
+    - .company.people
+    - .company.employee
+decrypt:
+  object:
+    - .company.people.data
+    - .company.employee.data
+  file:
+    - .company.people
+    - .company.employee
