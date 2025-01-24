@@ -76,7 +76,6 @@ export default function Scene({ debug = false }) {
         <Tree position={[5, 0, 3]} scale={0.45} debug={debug} snow={true} />
         <Tree position={[3, 0, 5]} scale={0.4} debug={debug} snow={true} />
 
-        {/* Decorative Items */}
         {/* Nutcrackers guarding the path */}
         <Nutcracker 
           position={[-2, 0, -2]} 
@@ -91,21 +90,6 @@ export default function Scene({ debug = false }) {
           debug={debug} 
         />
         
-        {/* Lanterns lighting the path */}
-        <Lantern position={[-1.5, 0, -1.5]} scale={0.3} debug={debug} />
-        <Lantern position={[1.5, 0, -1.5]} scale={0.3} debug={debug} />
-        <Lantern position={[-1, 0, 0]} scale={0.3} debug={debug} />
-        <Lantern position={[1, 0, 0]} scale={0.3} debug={debug} />
-        <Lantern position={[-0.5, 0, 1.5]} scale={0.3} debug={debug} />
-        <Lantern position={[0.5, 0, 1.5]} scale={0.3} debug={debug} />
-
-        {/* Lanterns around the tree */}
-        <Lantern position={[3.5, 0, 4.5]} scale={0.25} debug={debug} />
-        <Lantern position={[4.5, 0, 4.5]} scale={0.25} debug={debug} />
-        <Lantern position={[4.5, 0, 3.5]} scale={0.25} debug={debug} />
-        <Lantern position={[3.5, 0, 3.5]} scale={0.25} debug={debug} />
-
-        {/* Nutcrackers guarding the tree */}
         <Nutcracker 
           position={[3.2, 0, 3.2]} 
           rotation={[0, -Math.PI/4, 0]} 
@@ -124,14 +108,21 @@ export default function Scene({ debug = false }) {
           scale={0.35} 
           debug={debug} 
         />
-
-        {/* Nutcracker by the tree */}
         <Nutcracker 
           position={[3.5, 0, 3.5]} 
           rotation={[0, -Math.PI/3, 0]} 
           scale={0.35} 
           debug={debug} 
         />
+
+        {/* Lanterns */}
+        {[
+          [-1.5, -1.5], [1.5, -1.5], [-1, 0], [1, 0],
+          [-0.5, 1.5], [0.5, 1.5], [3.5, 4.5], [4.5, 4.5],
+          [4.5, 3.5], [3.5, 3.5]
+        ].map(([x, z], i) => (
+          <Lantern key={i} position={[x, 0, z]} scale={0.3} debug={debug} />
+        ))}
 
         {/* Present Set A */}
         <PresentACube position={[3, 0, 3.5]} scale={0.5} debug={debug} />
@@ -172,7 +163,6 @@ export default function Scene({ debug = false }) {
           scale={0.4}
           debug={debug}
         />
-
       </Suspense>
 
       {/* Ground plane */}

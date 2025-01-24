@@ -52,6 +52,7 @@ Postgres Performance Studies and Benchmarks will be [here](https://github.com/Ma
 - [Codepen May 2021 Challenge Week 1](./codepen-may-2021/week1/)
 - [ThreeJS Vanilla Template](./three-template)
 - [React Canvas](./react-canvas/)
+- [React Three OBJ Model Loading](./react-three-scenery)
 
 ---
 
