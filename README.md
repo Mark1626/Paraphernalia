@@ -59,6 +59,8 @@ Postgres Performance Studies and Benchmarks will be [here](https://github.com/Ma
 #### Graphics
 
 - [Procedural Road Generation](./procedural-road-gen)
+- [Procudural Tilemap Gen with Wavefunction Collapse](./procedural-gen/)
+- [Mode 7](./mode7/)
 
 ---
 
