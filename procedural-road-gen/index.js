@@ -1,12 +1,8 @@
-import Delaunator from 'delaunator';
-
 // Voronoi-based Road Generation
-const GRID_SIZE = 50;
-const NUM_POINTS = 15; // Number of city centers
-const ROAD_CHAR = 'x';
-
-// Create empty grid
-const grid = Array(GRID_SIZE).fill().map(() => Array(GRID_SIZE).fill('0'));
+const GRID_SIZE = 500; // Increased for better SVG visibility
+const NUM_POINTS = 10; // Number of city centers
+const CITY_RADIUS = 5;
+const ROAD_WIDTH = 2;
 
 // Generate random points
 function generatePoints() {
@@ -20,69 +16,57 @@ function generatePoints() {
     return points;
 }
 
-// Draw line using Bresenham's algorithm
-function drawLine(x0, y0, x1, y1) {
-    let dx = Math.abs(x1 - x0);
-    let dy = Math.abs(y1 - y0);
-    let sx = (x0 < x1) ? 1 : -1;
-    let sy = (y0 < y1) ? 1 : -1;
-    let err = dx - dy;
+// Create SVG path for a road
+function createRoadPath(p1, p2) {
+    return `M ${p1[0]} ${p1[1]} L ${p2[0]} ${p2[1]}`;
+}
 
-    while (true) {
-        if (x0 >= 0 && x0 < GRID_SIZE && y0 >= 0 && y0 < GRID_SIZE) {
-            grid[y0][x0] = ROAD_CHAR;
-        }
-
-        if (x0 === x1 && y0 === y1) break;
-        let e2 = 2 * err;
-        if (e2 > -dy) {
-            err -= dy;
-            x0 += sx;
-        }
-        if (e2 < dx) {
-            err += dx;
-            y0 += sy;
-        }
-    }
+// Draw roads for a triangle
+function drawTriangleRoads(p1, p2, p3) {
+    return [
+        createRoadPath(p1, p2),
+        createRoadPath(p2, p3),
+        createRoadPath(p3, p1)
+    ];
 }
 
 // Generate roads using Delaunay triangulation
 function generateRoads() {
     const points = generatePoints();
-    
-    // Create Delaunay triangulation
     const triangles = Delaunator.from(points.map(p => [p[0], p[1]]));
-    console.log("Generating trianges")
-    console.log(points)
-
+    
+    // Create SVG content
+    const svgPaths = [];
+    const cityCenters = [];
+    
+    // Add city centers
     for (let i = 0; i < points.length; i++) {
-        grid[points[i][1]][points[i][0]] = '●';
+        cityCenters.push(`<circle cx="${points[i][0]}" cy="${points[i][1]}" r="${CITY_RADIUS}" fill="red"/>`);
     }
-
-    console.log(triangles)
     
     // Draw roads between connected points
     for (let i = 0; i < triangles.triangles.length; i += 3) {
         const p1 = points[triangles.triangles[i]];
         const p2 = points[triangles.triangles[i + 1]];
         const p3 = points[triangles.triangles[i + 2]];
-
-        console.log(p1, p2, p3)
         
-        // Draw roads between triangle vertices
-        drawLine(p1[0], p1[1], p2[0], p2[1]);
-        drawLine(p2[0], p2[1], p3[0], p3[1]);
-        drawLine(p3[0], p3[1], p1[0], p1[1]);
+        const roads = drawTriangleRoads(p1, p2, p3);
+        svgPaths.push(...roads);
     }
+    
+    // Combine all paths into a single SVG path element
+    const roadPaths = `<path d="${svgPaths.join(' ')}" stroke="black" stroke-width="${ROAD_WIDTH}" fill="none"/>`;
+    
+    // Create the final SVG
+    const svg = `<svg width="${GRID_SIZE}" height="${GRID_SIZE}" xmlns="http://www.w3.org/2000/svg">
+        <rect width="100%" height="100%" fill="#f0f0f0"/>
+        ${roadPaths}
+        ${cityCenters.join('\n        ')}
+    </svg>`;
+    
+    return svg;
 }
 
-// Print the grid
-function printGrid() {
-    for (let y = 0; y < GRID_SIZE; y++) {
-        console.log(grid[y].join(''));
-    }
-}
-
-// Generate and print
-generateRoads();
-printGrid();
+// Generate and output SVG
+const svg = generateRoads();
+console.log(svg);
