@@ -96,6 +96,12 @@ Postgres Performance Studies and Benchmarks will be [here](https://github.com/Ma
 
 ---
 
+### Datafusion
+
+- [Datafusion Memtables](./datafusion-memtable/)
+
+---
+
 ### Documentation
 
 - [Pandoc Book](./pandoc-book/)
