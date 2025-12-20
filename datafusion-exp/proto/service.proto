@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+import "google/protobuf/any.proto";
+
+package mark;
+
+service DFProto {
+    rpc FetchBatches (FetchRecordBatchRequest) returns (FetchRecordBatchResponse);
+}
+
+message FetchRecordBatchRequest {
+    string id = 1;
+}
+
+message FetchRecordBatchResponse {
+    bytes batches = 1;
+}
