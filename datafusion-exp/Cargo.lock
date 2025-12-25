@@ -205,6 +205,26 @@ dependencies = [
 ]
 
 [[package]]
+name = "arrow-flight"
+version = "57.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "8b5f57c3d39d1b1b7c1376a772ea86a131e7da310aed54ebea9363124bb885e3"
+dependencies = [
+ "arrow-array",
+ "arrow-buffer",
+ "arrow-cast",
+ "arrow-ipc",
+ "arrow-schema",
+ "base64",
+ "bytes",
+ "futures",
+ "prost",
+ "prost-types",
+ "tonic",
+ "tonic-prost",
+]
+
+[[package]]
 name = "arrow-ipc"
 version = "57.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1186,13 +1206,17 @@ version = "0.1.0"
 dependencies = [
  "anyhow",
  "arrow",
+ "arrow-flight",
+ "async-trait",
  "bytes",
+ "dashmap",
  "datafusion",
  "futures",
  "futures-util",
  "pin-project",
  "prost",
  "tokio",
+ "tokio-stream",
  "tonic",
  "tonic-prost",
  "tonic-prost-build",
