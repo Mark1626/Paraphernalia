@@ -1,0 +1,48 @@
+[workspace]
+members = ["iroh-arrow"]
+
+[workspace.dependencies]
+iroh = "0.96"
+arrow = "57.0.0"
+arrow-ipc = "57.0.0"
+anyhow = "1"
+
+[package]
+name = "df-p2p"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+# Local
+iroh-arrow = { path = "iroh-arrow" }
+
+# Networking
+iroh = { workspace = true }
+
+# DataFusion
+datafusion = { version = "52.2.0", default-features = false, features = [
+    "parquet",
+    "sql",
+    "unicode_expressions",
+    "datetime_expressions",
+] }
+datafusion-proto = "52.2.0"
+datafusion-datasource = "52.2.0"
+
+# Arrow
+arrow = { workspace = true }
+
+# Async
+tokio = { version = "1", features = ["full"] }
+futures = "0.3"
+
+# Utils
+anyhow = { workspace = true }
+clap = { version = "4", features = ["derive"] }
+tracing = "0.1.44"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+serde_json = "1"
+bytes = "1.11.1"
+
+[dev-dependencies]
+insta = "1"

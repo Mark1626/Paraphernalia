@@ -1,0 +1,14 @@
+[package]
+name = "iroh-arrow"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+iroh = { workspace = true }
+arrow = { workspace = true }
+arrow-ipc = { workspace = true }
+anyhow = { workspace = true }
+tracing = "0.1.44"
+
+[dev-dependencies]
+tokio = { version = "1", features = ["macros", "rt-multi-thread"] }
