@@ -1,0 +1,14 @@
+[package]
+name = "tpcds-delta"
+version = "0.1.0"
+edition = "2021"
+description = "Generate TPC-DS data as partitioned Delta Lake tables using DuckDB + delta-rs"
+
+[dependencies]
+duckdb = { version = "1.4", features = ["bundled"] }
+deltalake = { version = "0.30", features = ["datafusion"] }
+arrow = { version = "57", default-features = false }
+tokio = { version = "1", features = ["full"] }
+clap = { version = "4", features = ["derive"] }
+url = "2"
+
