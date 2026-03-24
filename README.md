@@ -19,6 +19,7 @@ Postgres Performance Studies and Benchmarks will be [here](https://github.com/Ma
 #### Algo
 
 - [N Queens backtrack](./bktrack/)
+- [Graph Algorithms](./graphs/)
 
 ---
 
@@ -29,6 +30,7 @@ Postgres Performance Studies and Benchmarks will be [here](https://github.com/Ma
 - [Lua Module Loaders](./lua-package-loader/)
 - [Function Composition](./function-compose/)
 - [Node Module Extensions](./node-module-extensions/)
+- [JS Code Golf / Constrict](./js-constrict/)
 
 ---
 
@@ -53,6 +55,7 @@ Postgres Performance Studies and Benchmarks will be [here](https://github.com/Ma
 - [ThreeJS Vanilla Template](./three-template)
 - [React Canvas](./react-canvas/)
 - [React Three OBJ Model Loading](./react-three-scenery)
+- [Isometric City Builder](./isocity-builder/)
 
 ---
 
@@ -70,6 +73,8 @@ Postgres Performance Studies and Benchmarks will be [here](https://github.com/Ma
 - [Http CGI](./http-cgi/)
 - [Web Socket NodeJS](./web-socket-test/)
 - [JWT](./jwt/)
+- [Iroh Partial Providers](./iroh-exp/)
+- [Iroh P2P Queue](./iroh-queue/)
 
 ---
 
@@ -78,6 +83,7 @@ Postgres Performance Studies and Benchmarks will be [here](https://github.com/Ma
 - [Spring Multipart with Zuul](./spring-proxy-multipart/)
 - [Spring Jaeger](./spring-tracing-jaeger/)
 - [Spring Hazelcast](./spring-hazelcast/)
+- [Embedded Tomcat](./embeddedTomcat/)
 
 ---
 
@@ -99,12 +105,18 @@ Postgres Performance Studies and Benchmarks will be [here](https://github.com/Ma
 ### Datafusion
 
 - [Datafusion Memtables](./datafusion-memtable/)
+- [Datafusion Experiments](./datafusion-exp/)
+- [Datafusion Iroh Distribution](./df-iroh-exp/)
+- [Datafusion P2P Distribution](./df-p2p/)
+- [TPC-DS Data Generation](./tpcds-delta/)
+- [Iceberg hidden partition generator](./iceberg-hidden-partition/)
 
 ---
 
 ### Documentation
 
 - [Pandoc Book](./pandoc-book/)
+- [Notebooks](./notebooks/)
 
 ---
 
@@ -132,6 +144,7 @@ Postgres Performance Studies and Benchmarks will be [here](https://github.com/Ma
 
 - [getopt_long](./getopt-test/)
 - [Ncurses](./ncurses/)
+- [Star Catalog Parser](./astronomy/)
 
 ---
 
@@ -145,6 +158,8 @@ Postgres Performance Studies and Benchmarks will be [here](https://github.com/Ma
 ### Misc
 
 - [The lamp](./the-lamp/)
+- [System Configs](./configs/)
+- [Rust Experiments](./rust-exp/)
 
 ---
 
@@ -163,6 +178,12 @@ Postgres Performance Studies and Benchmarks will be [here](https://github.com/Ma
 ### Shell
 
 - [yaml path autocompletion](./yaml-autocomplete/README.md)
+
+---
+
+### TLA+
+
+- [TLA+ Formal Specifications](./tla-exp/)
 
 ---
 
