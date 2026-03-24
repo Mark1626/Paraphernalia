@@ -12,16 +12,21 @@ Inspired by [datafusion-distributed](https://github.com/probably-nothing-labs/da
 ## Architecture
 
 ```
-Peer A (query initiator)               Peer B (worker)
+Peer A (query initiator / producer)     Peer B (consumer / worker)
    │                                     │
    │  SQL → logical → physical plan      │
    │  optimizer rule: replace            │
    │    CoalescePartitionsExec with       │
    │    DistributedCoalesceExec          │
    │                                     │
-   │  ──── serialized plan (protobuf) ─> │
-   │                                     │  deserialize → execute
-   │  <──── Arrow IPC batches ────────   │
+   │  Producer.enqueue_and_wait(payload) │
+   │  ──── gossip: JobAvailable ──────>  │
+   │                                     │  Consumer hears signal
+   │  <──── QUIC: Claim(job_id) ───────  │
+   │  ──── QUIC: Granted(payload) ────>  │
+   │                                     │  deserialize → execute plan
+   │  <──── QUIC: Ack(Arrow IPC) ──────  │
+   │  oneshot channel delivers result    │
    │                                     │
    │  (roles are symmetric — Peer B      │
    │   could query Peer A too)           │
@@ -31,8 +36,10 @@ Peer A (query initiator)               Peer B (worker)
 
 1. A peer receives a SQL query and plans it locally (SQL → logical plan → physical plan)
 2. The `apply_network_boundaries` optimizer rule finds `CoalescePartitionsExec` and replaces it with `DistributedCoalesceExec`, serializing the child subtree into a `Stage`
-3. During execution, `DistributedCoalesceExec` uses `DistributedContext` (a session config extension) to send the serialized plan to remote peers over iroh QUIC
-4. Remote peers deserialize the physical plan, execute it via DataFusion, and stream back Arrow IPC batches
+3. During execution, `DistributedCoalesceExec` enqueues each partition as a job in the distributed work queue via `DistributedContext::submit_to_queue()`
+4. Job availability is broadcast via iroh-gossip to all peers in the topic
+5. Available worker peers (consumers) race to claim jobs via direct QUIC connections, execute the physical plan, and ack with Arrow IPC encoded results
+6. Results are delivered back to the producer via oneshot channels
 
 ### Project structure
 
@@ -43,15 +50,23 @@ iroh-arrow/            Transport layer (no DataFusion dependency)
   src/stream.rs        send/recv helpers over iroh QUIC streams
 src/
   lib.rs               Public API
-  context.rs           DistributedContext — session extension with execute_on_worker()
-  worker.rs            Worker node: accepts plans, executes, returns batches
+  context.rs           DistributedContext — session extension with submit_to_queue()
+  worker.rs            Worker: queue consumer that executes plans from jobs
   optimizer_rule.rs    apply_network_boundaries() — replaces CoalescePartitionsExec
   stage.rs             Stage { stage_id, encoded_plan }
   operators/
     distributed_coalesce.rs  DistributedCoalesceExec ExecutionPlan node
+  queue/               Distributed work queue (inlined from iroh-queue PoC)
+    mod.rs             Re-exports, well-known gossip TopicId
+    protocol.rs        GossipSignal, QueueRequest/Response, postcard framing
+    store.rs           JobStore with oneshot channels for result delivery
+    gossip.rs          GossipBridge, SignalSender/Receiver
+    handler.rs         QueueProtocol — iroh ProtocolHandler for claim/ack/nack
+    producer.rs        Producer — enqueue_and_wait() blocks until result
+    consumer.rs        Consumer — listens for gossip, claims jobs, runs handler
+    error.rs           QueueError enum
 examples/
-  in_process.rs        Self-contained demo (worker + scheduler in one process)
-  peer_node.rs         Unified P2P node with auto-discovery (CSV + parquet)
+  peer_node.rs         Unified P2P node with gossip + queue scheduling
   query_client.rs      Send SQL queries to any peer node
 testdata/
   sample.csv           Sample dataset for demos
@@ -64,17 +79,9 @@ testdata/
 - Rust 2024 edition (1.85+)
 - Internet access (iroh uses relay servers for peer discovery)
 
-### In-process demo
-
-Runs a worker and scheduler in the same process. No separate processes needed.
-
-```bash
-cargo run --example in_process
-```
-
 ### P2P demo (three terminals)
 
-Peers auto-discover each other via a shared `peers/` directory.
+Peers auto-discover each other via a shared `peers/` directory and coordinate work via iroh-gossip. Works with a single peer (self-consumption) or multiple peers.
 
 **Terminal 1 — start peer 1:**
 
@@ -94,7 +101,7 @@ cargo run --example peer_node -- --table-path testdata/sample.csv
 cargo run --example query_client -- "SELECT city, SUM(amount) as total FROM data GROUP BY city ORDER BY total DESC"
 ```
 
-The query client discovers a peer from `peers/`, sends SQL over iroh QUIC. The receiving peer discovers other peers, plans the query, applies the distributed optimizer rule, and distributes execution. Results stream back as Arrow IPC batches.
+The query client discovers a peer from `peers/`, sends SQL over iroh QUIC. The receiving peer plans the query, applies the distributed optimizer rule, and enqueues work to the distributed queue. Available peer consumers claim and execute the work dynamically. Results flow back via the queue protocol as Arrow IPC batches.
 
 Expected output:
 ```
@@ -126,9 +133,11 @@ RUST_LOG=debug cargo run --example peer_node -- --table-path testdata/sample.csv
 | Crate | Version | Role |
 |---|---|---|
 | `iroh` | 0.96 | P2P networking (QUIC, relay, discovery) |
+| `iroh-gossip` | 0.96 | Broadcast signaling for work queue coordination |
 | `datafusion` | 52.2.0 | SQL query engine |
 | `datafusion-proto` | 52.2.0 | Physical plan protobuf serialization |
 | `arrow` / `arrow-ipc` | 57.0.0 | Columnar data format and IPC serialization |
+| `postcard` | 1 | Queue wire format (length-prefixed serialization) |
 | `tokio` | 1 | Async runtime |
 
 ### Run tests
@@ -144,14 +153,13 @@ cargo test                   # all workspace tests
 - [x] Distributed physical optimizer rule (`apply_network_boundaries`)
 - [x] `DistributedCoalesceExec` over iroh streams
 - [x] Unified P2P peer node example
-- [x] Multi-worker partitioned execution (round-robin across N peers)
+- [x] Multi-worker partitioned execution
+- [x] Dynamic queue-based scheduling via iroh-gossip (workers pull work)
 - [x] Parquet table support (hive-partitioned via `--dataset-dir`)
-- [x] Dynamic peer auto-discovery (shared `peers/` directory)
+- [x] Dynamic peer auto-discovery (shared `peers/` directory + gossip)
 - [x] Separate query client (`query_client`)
 - [x] Unit tests for iroh-arrow crate (codec, protocol)
+- [x] Stale job reaper (re-enqueues timed-out jobs)
 - [ ] Streaming results (currently buffers entire result set)
 - [ ] Multi-stage query plans (nested distribution)
-
-## TODO
-
-- [] When the connection pool's lock is poisoned we panic
+- [x] Self-consumption (peer consuming its own jobs via local mpsc channel)

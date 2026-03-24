@@ -115,14 +115,12 @@ impl ExecutionPlan for DistributedCoalesceExec {
                 )
             })?;
 
-        let worker_index = partition % dist_ctx.worker_count();
-
         let encoded_plan = self.stage.encoded_plan.clone();
         let schema = Arc::clone(&self.schema);
 
         let stream = futures::stream::once(async move {
             dist_ctx
-                .execute_on_worker(worker_index, partition, &encoded_plan)
+                .submit_to_queue(partition, &encoded_plan)
                 .await
                 .map_err(|e| DataFusionError::Internal(format!("{e:#}")))
         })

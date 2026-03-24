@@ -14,15 +14,14 @@ Reference project: `/Users/nimalanm/Documents/opensource/db/datafusion-distribut
 
 ```bash
 cargo check                          # type-check
-cargo run --example in_process       # self-contained single-process demo
-RUST_LOG=debug cargo run --example in_process  # verbose logging
 
-# P2P multi-node demo (two terminals):
+# P2P multi-node demo with dynamic queue scheduling (two+ terminals):
 # Terminal 1:
-cargo run --example peer_node -- --table-path testdata/sample.csv --addr-file peer1.json
+cargo run --example peer_node -- --table-path testdata/sample.csv
 # Terminal 2:
-cargo run --example peer_node -- --table-path testdata/sample.csv --addr-file peer2.json \
-  --peer peer1.json --query "SELECT city, SUM(amount) FROM data GROUP BY city"
+cargo run --example peer_node -- --table-path testdata/sample.csv
+# Terminal 3 (query any peer):
+cargo run --example query_client -- "SELECT city, SUM(amount) as total FROM data GROUP BY city"
 ```
 
 ```bash
@@ -30,7 +29,7 @@ cargo test -p iroh-arrow                 # iroh-arrow unit tests (codec, protoco
 cargo test                               # all workspace tests
 ```
 
-The `in_process` and `peer_node` / `query_client` examples are the primary end-to-end verification.
+The `peer_node` / `query_client` examples are the primary end-to-end verification. Works with a single peer (self-consumption via local mpsc channel) or multiple peers.
 
 ## Key files
 
@@ -42,37 +41,57 @@ The `in_process` and `peer_node` / `query_client` examples are the primary end-t
 
 ### df-p2p crate (DataFusion integration)
 
-- `src/context.rs` - `DistributedContext` session config extension holding iroh `Endpoint` + worker addresses; `execute_on_worker()` handles connect → send plan → receive batches
-- `src/worker.rs` - `Worker` struct using iroh `Router` with `IrohArrow<PhysicalPlanHandler>`; `new()` creates own endpoint, `with_endpoint()` shares an existing one for P2P; `plan_protocol_handler()` factory for custom Router setups; deserializes physical plans, executes via DataFusion, returns record batches
+- `src/context.rs` - `DistributedContext` session config extension holding iroh `Endpoint` + `Producer`; `submit_to_queue()` enqueues plans to the distributed work queue and awaits results
+- `src/worker.rs` - `Worker` wraps a queue `Consumer` loop; spawns a tokio task that listens for gossip signals, claims jobs, deserializes physical plans, executes them, and acks with Arrow IPC encoded results
 - `src/optimizer_rule.rs` - `apply_network_boundaries(plan)` walks the physical plan tree via `transform_down` and replaces the first `CoalescePartitionsExec` with `DistributedCoalesceExec`
-- `src/operators/distributed_coalesce.rs` - `DistributedCoalesceExec` leaf ExecutionPlan node; serialized child plan in `Stage`; on `execute(partition)` calls `DistributedContext::execute_on_worker()` to send work to remote peers
+- `src/operators/distributed_coalesce.rs` - `DistributedCoalesceExec` leaf ExecutionPlan node; serialized child plan in `Stage`; on `execute(partition)` calls `DistributedContext::submit_to_queue()` to enqueue work for dynamic scheduling
 - `src/stage.rs` - `Stage { stage_id, encoded_plan }` holds a serialized physical plan (protobuf bytes)
-- `examples/in_process.rs` - Both worker and scheduler in one process, sharing a `SessionContext`
-- `examples/peer_node.rs` - Unified P2P node: dual ALPN (plan execution + SQL query handling), auto-discovers peers from `peers/` directory, supports CSV (`--table-path`) and hive-partitioned parquet (`--dataset-dir`)
+
+### queue module (distributed work queue, inlined from iroh-queue PoC)
+
+- `src/queue/protocol.rs` - `GossipSignal` (JobAvailable, JobClaimed), `QueueRequest` (Claim, Ack, Nack), `QueueResponse` (Granted, AlreadyClaimed, Acked, Error); length-prefixed postcard framing; ALPN (`b"iroh-queue/0"`)
+- `src/queue/store.rs` - `JobStore` thread-safe in-memory job store with FIFO ordering; `enqueue()` returns oneshot receiver for result delivery; `ack()` delivers result bytes through the channel; `reap_stale()` re-enqueues timed-out jobs
+- `src/queue/gossip.rs` - `GossipBridge` joins an iroh-gossip topic; `SignalSender`/`SignalReceiver` typed wrappers for broadcasting/receiving `GossipSignal` messages
+- `src/queue/handler.rs` - `QueueProtocol` implements iroh `ProtocolHandler`; accepts consumer connections, handles claim/ack/nack request-response cycles on bi-streams
+- `src/queue/producer.rs` - `Producer` enqueues jobs and broadcasts availability via gossip; `enqueue_and_wait()` blocks until a consumer processes the job and returns the result; runs stale job reaper
+- `src/queue/consumer.rs` - `Consumer` listens for gossip signals, races to claim jobs via direct QUIC to producer, processes with a pluggable handler fn, acks/nacks; `ClaimHandle` for lifecycle management
+- `src/queue/mod.rs` - Re-exports + `work_queue_topic()` well-known TopicId
+
+### Examples
+
+- `examples/peer_node.rs` - Unified P2P node: triple ALPN (queue protocol + gossip + SQL query handling), auto-discovers peers from `peers/` directory for gossip bootstrapping, supports CSV (`--table-path`) and hive-partitioned parquet (`--dataset-dir`)
 - `examples/query_client.rs` - Connects to any peer and sends a SQL query, displays results
 
 ## Architecture
 
 ```
-Peer A (query initiator)               Peer B (worker)
+Peer A (query initiator / producer)     Peer B (consumer / worker)
    │                                     │
    │  SQL → logical plan → physical plan │
    │  optimizer: CoalescePartitionsExec  │
    │     → DistributedCoalesceExec       │
-   │  serialize(child_plan)              │
-   │  ──── protobuf bytes ────────────>  │
-   │                                     │  deserialize → execute
-   │  <──── Arrow IPC batches ────────   │
+   │  serialize(child_plan) into Stage   │
    │                                     │
-   │  (Peer A is also a worker —         │
-   │   Peer B could query A too)         │
+   │  Producer.enqueue_and_wait(payload) │
+   │  ──── gossip: JobAvailable ──────>  │
+   │                                     │  Consumer hears signal
+   │  <──── QUIC: Claim(job_id) ───────  │
+   │  ──── QUIC: Granted(payload) ────>  │
+   │                                     │  deserialize → execute plan
+   │  <──── QUIC: Ack(Arrow IPC) ──────  │
+   │  oneshot channel delivers result    │
+   │                                     │
+   │  (Any peer can be both producer     │
+   │   and consumer simultaneously)      │
 ```
 
-The optimizer rule replaces `CoalescePartitionsExec` with `DistributedCoalesceExec`, which serializes the child subtree into a `Stage` and sends it to remote peers. Each peer runs a `Worker` that deserializes and executes the plan locally.
+**Dynamic scheduling via distributed queue**: The optimizer rule replaces `CoalescePartitionsExec` with `DistributedCoalesceExec`, which serializes the child subtree into a `Stage`. On `execute(partition)`, instead of sending directly to a specific worker (static assignment), the plan is enqueued as a job in the distributed queue. Available worker peers (consumers) hear the gossip signal, race to claim the job, execute the plan, and ack with Arrow IPC encoded results. Results are delivered back to the producer via oneshot channels.
 
-`DistributedContext` (registered as a session config extension) provides the iroh `Endpoint` and worker addresses, and encapsulates the connect → send → receive logic via `execute_on_worker()`.
+**Queue protocol**: Uses iroh-gossip for broadcast signaling (job availability, claim notifications) and direct QUIC bi-streams for reliable claim/ack/nack exchanges. The `QueueProtocol` handler runs on each peer to accept consumer connections. Each peer is both a producer (can submit work) and a consumer (can pull and execute work).
 
-`IrohArrow<H>` handles the connection lifecycle: accept bi-stream → read request → delegate to `RequestHandler` → send Arrow IPC response → `conn.closed().await`.
+`DistributedContext` (registered as a session config extension) holds a `Producer` and submits work via `submit_to_queue()`.
+
+`IrohArrow<H>` handles the SQL query submission lifecycle: accept bi-stream → read SQL → plan/distribute/execute → send Arrow IPC response.
 
 ## iroh 0.96 API conventions
 
@@ -95,15 +114,23 @@ These are the correct API names (iroh renamed many types from earlier versions):
 
 **Important**: `SendStream::finish()` is synchronous and does NOT wait for data to be flushed. Dropping `Connection` immediately after `finish()` will send CONNECTION_CLOSE and abort in-flight data. Always `conn.closed().await` on the responder side.
 
-## Wire protocol
+## Wire protocols
 
-Over iroh QUIC bi-directional stream:
-1. **Request** (initiator -> worker): serialized DataFusion physical plan (protobuf via `datafusion-proto`), then `send.finish()`
-2. **Response** (worker -> initiator): Arrow IPC stream bytes (schema + batches), then `send.finish()`
+### Queue protocol (`iroh-queue/0` ALPN)
+Over iroh QUIC bi-directional stream, length-prefixed postcard messages:
+1. **Claim flow**: Consumer → `Claim{job_id}` → Producer responds `Granted{payload}` → Consumer processes → `Ack{result: Arrow IPC bytes}` → Producer responds `Acked`
+2. **Job payload**: `[partition as u32 LE][physical plan protobuf bytes]`
+3. **Gossip signals**: `JobAvailable{job_id, producer, priority}`, `JobClaimed{job_id, consumer}`
+
+### SQL query protocol (`mark/df-p2p-query/0` ALPN)
+Over iroh QUIC bi-directional stream (via `IrohArrow`):
+1. **Request**: SQL string bytes, then `send.finish()`
+2. **Response**: Arrow IPC stream bytes (schema + batches), then `send.finish()`
 
 ## Dependencies
 
-- iroh = "0.96", datafusion = "52.2.0", datafusion-proto = "52.2.0", arrow/arrow-ipc = "57.0.0", tracing = "0.1.44"
+- iroh = "0.96", iroh-gossip = "0.96", datafusion = "52.2.0", datafusion-proto = "52.2.0", arrow/arrow-ipc = "57.0.0"
+- postcard = "1" (queue wire format), uuid = "1" (job IDs), serde = "1", thiserror = "2"
 - Rust edition 2024
 
 ## Testing

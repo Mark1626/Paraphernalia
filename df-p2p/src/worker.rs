@@ -1,132 +1,99 @@
-use anyhow::{Context, Result};
-use arrow::array::RecordBatch;
+use anyhow::Result;
 use datafusion::physical_plan::display::DisplayableExecutionPlan;
 use datafusion::prelude::SessionContext;
 use datafusion_proto::bytes::physical_plan_from_bytes;
 use futures::StreamExt;
-use iroh::Endpoint;
-use iroh::protocol::Router;
-use iroh_arrow::protocol::{ALPN, IrohArrow, RequestHandler};
 use tracing::info;
+use uuid::Uuid;
 
-/// Receives serialized DataFusion physical plans with a partition number,
-/// executes only the specified partition, and returns record batches.
+use crate::queue::Consumer;
+
+/// A worker that pulls execution plans from the distributed queue and processes them.
 ///
-/// Wire format: `[partition as u32 LE][plan bytes]`
-#[derive(Clone)]
-struct PhysicalPlanHandler {
-    ctx: SessionContext,
-}
-
-impl std::fmt::Debug for PhysicalPlanHandler {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("PhysicalPlanHandler")
-            .finish_non_exhaustive()
-    }
-}
-
-impl RequestHandler for PhysicalPlanHandler {
-    async fn handle(&self, request: &[u8]) -> anyhow::Result<Vec<RecordBatch>> {
-        anyhow::ensure!(
-            request.len() >= 4,
-            "request too short: missing partition header"
-        );
-
-        let partition = u32::from_le_bytes(request[..4].try_into().unwrap()) as usize;
-        let plan_bytes = &request[4..];
-
-        info!(
-            request_len = request.len(),
-            partition, "received plan from peer"
-        );
-
-        let task_ctx = self.ctx.task_ctx();
-        let plan = physical_plan_from_bytes(plan_bytes, &task_ctx)
-            .context("failed to deserialize physical plan")?;
-
-        let displayable_plan = DisplayableExecutionPlan::new(plan.as_ref());
-        info!(
-            partition,
-            "executing physical plan for partition {}:\n{}",
-            partition,
-            displayable_plan.indent(false)
-        );
-
-        let mut stream = plan
-            .execute(partition, task_ctx)
-            .context("failed to execute partition")?;
-
-        let mut batches = Vec::new();
-        while let Some(batch) = stream.next().await {
-            batches.push(batch.context("error reading batch from partition stream")?);
-        }
-
-        let total_rows: usize = batches.iter().map(|b| b.num_rows()).sum();
-        info!(
-            partition,
-            num_batches = batches.len(),
-            total_rows,
-            "sending results back to peer"
-        );
-
-        Ok(batches)
-    }
-}
-
-/// Create the IrohArrow protocol handler for physical plan execution.
-/// Use this when building a custom Router with multiple protocol handlers.
-pub fn plan_protocol_handler(ctx: SessionContext) -> impl iroh::protocol::ProtocolHandler {
-    IrohArrow::new(PhysicalPlanHandler { ctx }).with_max_request_size(1024 * 1024)
-}
-
-/// A worker node that accepts DataFusion physical plans over iroh and streams back results.
-///
-/// Uses iroh's `Router` with `IrohArrow<PhysicalPlanHandler>` — the accept loop is spawned
-/// automatically when the worker is created.
+/// Wraps a `Consumer` loop that listens for gossip signals, claims available jobs,
+/// deserializes and executes DataFusion physical plans, and acks with Arrow IPC results.
 pub struct Worker {
-    router: Router,
+    handle: tokio::task::JoinHandle<crate::queue::Result<()>>,
 }
 
 impl Worker {
-    /// Create a new worker. The accept loop starts immediately in the background.
-    pub async fn new(ctx: SessionContext) -> Result<Self> {
-        let endpoint = Endpoint::builder()
-            .bind()
+    /// Spawn a consumer loop that pulls plans from the queue and executes them.
+    pub fn spawn(ctx: SessionContext, mut consumer: Consumer) -> Self {
+        let handle = tokio::spawn(async move {
+            consumer
+                .run(move |job_id, payload| {
+                    let ctx = ctx.clone();
+                    async move { execute_plan(&ctx, job_id, payload).await }
+                })
+                .await
+        });
+
+        Self { handle }
+    }
+
+    /// Wait for the worker to finish (runs until gossip disconnects or error).
+    pub async fn join(self) -> Result<()> {
+        self.handle
             .await
-            .context("failed to bind iroh endpoint")?;
+            .map_err(|e| anyhow::anyhow!("worker task panicked: {e}"))?
+            .map_err(|e| anyhow::anyhow!("worker error: {e}"))
+    }
+}
 
-        let handler =
-            IrohArrow::new(PhysicalPlanHandler { ctx }).with_max_request_size(1024 * 1024);
-        let router = Router::builder(endpoint).accept(ALPN, handler).spawn();
-
-        info!(endpoint_id = %router.endpoint().id(), "worker accepting connections");
-
-        Ok(Self { router })
+/// Execute a serialized DataFusion physical plan from a queue job payload.
+///
+/// Payload wire format: `[partition as u32 LE][plan protobuf bytes]`
+async fn execute_plan(
+    ctx: &SessionContext,
+    job_id: Uuid,
+    payload: Vec<u8>,
+) -> std::result::Result<Option<Vec<u8>>, String> {
+    if payload.len() < 4 {
+        return Err("payload too short: missing partition header".to_string());
     }
 
-    /// Create a worker using an existing endpoint. Use this when the endpoint
-    /// is shared with other roles (e.g. a peer node that is both worker and scheduler).
-    pub async fn with_endpoint(ctx: SessionContext, endpoint: Endpoint) -> Result<Self> {
-        let handler =
-            IrohArrow::new(PhysicalPlanHandler { ctx }).with_max_request_size(1024 * 1024);
-        let router = Router::builder(endpoint).accept(ALPN, handler).spawn();
+    let partition = u32::from_le_bytes(payload[..4].try_into().unwrap()) as usize;
+    let plan_bytes = &payload[4..];
 
-        info!(endpoint_id = %router.endpoint().id(), "worker accepting connections");
+    info!(
+        %job_id,
+        partition,
+        plan_len = plan_bytes.len(),
+        "executing plan from queue"
+    );
 
-        Ok(Self { router })
+    let task_ctx = ctx.task_ctx();
+    let plan = physical_plan_from_bytes(plan_bytes, &task_ctx)
+        .map_err(|e| format!("failed to deserialize physical plan: {e}"))?;
+
+    let displayable = DisplayableExecutionPlan::new(plan.as_ref());
+    info!(
+        %job_id,
+        partition,
+        "plan:\n{}",
+        displayable.indent(false)
+    );
+
+    let mut stream = plan
+        .execute(partition, task_ctx)
+        .map_err(|e| format!("failed to execute partition {partition}: {e}"))?;
+
+    let mut batches = Vec::new();
+    while let Some(batch) = stream.next().await {
+        batches.push(batch.map_err(|e| format!("error reading batch: {e}"))?);
     }
 
-    /// Access the underlying iroh endpoint (for address info, node ID, etc.).
-    pub fn endpoint(&self) -> &Endpoint {
-        self.router.endpoint()
-    }
+    let total_rows: usize = batches.iter().map(|b| b.num_rows()).sum();
+    info!(
+        %job_id,
+        partition,
+        num_batches = batches.len(),
+        total_rows,
+        "encoding results"
+    );
 
-    /// Shut down the worker and close all connections.
-    pub async fn shutdown(self) -> Result<()> {
-        self.router
-            .shutdown()
-            .await
-            .map_err(|e| anyhow::anyhow!("shutdown error: {e}"))?;
-        Ok(())
-    }
+    let encoded = iroh_arrow::codec::encode_batches(&batches)
+        .map_err(|e| format!("failed to encode batches: {e}"))?;
+
+    Ok(Some(encoded))
 }

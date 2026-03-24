@@ -1,11 +1,13 @@
-//! P2P peer node — starts an iroh endpoint, registers data, and waits for queries.
+//! P2P peer node with dynamic queue-based scheduling.
 //!
 //! Each peer:
 //! 1. Binds an iroh endpoint and saves its address to `peers/` directory
-//! 2. Serves physical plan execution (worker role) on the iroh-arrow ALPN
-//! 3. Serves SQL query handling on the df-p2p-query ALPN — when a query arrives,
-//!    it auto-discovers other peers from `peers/`, plans the SQL, applies the
-//!    distributed optimizer rule, and executes across discovered peers
+//! 2. Joins a gossip topic for work queue coordination
+//! 3. Runs as both a producer (can submit work to the queue) and a consumer
+//!    (pulls work from the queue and executes it)
+//! 4. Serves SQL query handling on the df-p2p-query ALPN -- when a query arrives,
+//!    the optimizer inserts DistributedCoalesceExec which submits work to the queue,
+//!    and available peer consumers pick it up dynamically
 //!
 //! Use `query_client` to send SQL queries to any peer.
 //!
@@ -21,6 +23,7 @@
 
 use std::path::{Path, PathBuf};
 use std::sync::Arc;
+use std::time::Duration;
 
 use anyhow::{Context, Result};
 use arrow::array::RecordBatch;
@@ -34,9 +37,12 @@ use datafusion::physical_plan::display::DisplayableExecutionPlan;
 use datafusion::prelude::*;
 use df_p2p::context::{DistributedContext, QUERY_ALPN};
 use df_p2p::optimizer_rule::apply_network_boundaries;
+use df_p2p::queue::{self, Consumer, GossipBridge, JobStore, Producer, QueueProtocol};
+use df_p2p::worker::Worker;
 use iroh::protocol::Router;
 use iroh::{EndpointAddr, EndpointId};
-use iroh_arrow::protocol::{ALPN, IrohArrow, RequestHandler};
+use iroh_arrow::protocol::{IrohArrow, RequestHandler};
+use iroh_gossip::net::Gossip;
 use tracing::info;
 
 #[derive(Parser)]
@@ -58,12 +64,10 @@ struct Args {
     peers_dir: String,
 }
 
-/// Handles SQL queries from query_client: discovers peers, plans, distributes, executes.
+/// Handles SQL queries from query_client: plans, distributes via queue, executes.
 #[derive(Clone)]
 struct SqlQueryHandler {
     ctx: SessionContext,
-    peers_dir: PathBuf,
-    own_id: EndpointId,
 }
 
 impl std::fmt::Debug for SqlQueryHandler {
@@ -77,56 +81,39 @@ impl RequestHandler for SqlQueryHandler {
         let sql = std::str::from_utf8(request)?;
         info!(sql, "received SQL query from client");
 
-        // Discover peers at query time (auto-detect new nodes)
-        let peers = discover_peers(&self.peers_dir, &self.own_id)?;
-        info!(peer_count = peers.len(), "discovered peers");
-
-        if peers.is_empty() {
-            anyhow::bail!("no peer workers discovered in {}", self.peers_dir.display());
-        }
-
-        // Update DistributedContext with currently known peers
-        let dist_ctx = self
-            .ctx
-            .state()
-            .config()
-            .get_extension::<DistributedContext>()
-            .expect("DistributedContext must be registered");
-        dist_ctx.set_workers(peers);
-
-        // Plan and execute distributed query
+        // Plan and execute -- DistributedCoalesceExec submits work to the queue
         let logical = self.ctx.state().create_logical_plan(sql).await?;
         let physical = self.ctx.state().create_physical_plan(&logical).await?;
 
-        let disp_physical_plan = DisplayableExecutionPlan::new(physical.as_ref());
-        info!("Received plan {}", disp_physical_plan.indent(false));
+        let disp = DisplayableExecutionPlan::new(physical.as_ref());
+        info!("Physical plan:\n{}", disp.indent(false));
 
         let distributed = apply_network_boundaries(physical)?;
 
-        let disp_physical_plan = DisplayableExecutionPlan::new(distributed.as_ref());
-        info!("Distributed plan {}", disp_physical_plan.indent(false));
+        let disp = DisplayableExecutionPlan::new(distributed.as_ref());
+        info!("Distributed plan:\n{}", disp.indent(false));
 
-        let batches = collect(distributed, self.ctx.task_ctx()).await;
-
-        // Close pooled connections regardless of success/failure
-        dist_ctx.close_connections();
-
-        Ok(batches?)
+        let batches = collect(distributed, self.ctx.task_ctx()).await?;
+        Ok(batches)
     }
 }
 
-/// Scan the peers directory for address files, skipping our own.
-fn discover_peers(dir: &PathBuf, own_id: &EndpointId) -> Result<Vec<EndpointAddr>> {
+/// Read peer address files from the peers directory, skipping our own.
+fn discover_peers(dir: &Path, own_id: &EndpointId) -> Result<Vec<EndpointAddr>> {
     let own_id_str = own_id.to_string();
     let mut addrs = Vec::new();
 
-    for entry in std::fs::read_dir(dir)? {
+    let entries = match std::fs::read_dir(dir) {
+        Ok(e) => e,
+        Err(_) => return Ok(addrs),
+    };
+
+    for entry in entries {
         let entry = entry?;
         let path = entry.path();
         if path.extension().and_then(|e| e.to_str()) != Some("json") {
             continue;
         }
-        // Skip our own address file
         if let Some(stem) = path.file_stem().and_then(|s| s.to_str()) {
             if stem == own_id_str {
                 continue;
@@ -151,7 +138,6 @@ async fn register_parquet_tables(ctx: &SessionContext, dir: &str) -> Result<()> 
         if !path.is_dir() {
             continue;
         }
-        // Skip hidden directories and _delta_log
         let name = match path.file_name().and_then(|n| n.to_str()) {
             Some(n) if !n.starts_with('_') && !n.starts_with('.') => n.to_string(),
             _ => continue,
@@ -199,8 +185,41 @@ async fn main() -> Result<()> {
     std::fs::write(&addr_path, serde_json::to_string_pretty(&addr)?)?;
     info!(path = %addr_path.display(), "address saved");
 
-    // Create session context with DistributedContext (workers discovered dynamically)
-    let dist_ctx = DistributedContext::new(endpoint.clone());
+    // Discover peers for gossip bootstrapping
+    let peer_addrs = discover_peers(&peers_dir, &own_id)?;
+    let peer_ids: Vec<EndpointId> = peer_addrs.iter().map(|a| a.id).collect();
+    info!(peer_count = peer_ids.len(), "discovered peers for gossip bootstrap");
+
+    // Set up gossip
+    let gossip = Gossip::builder().spawn(endpoint.clone());
+    let topic = queue::work_queue_topic();
+    let bridge = GossipBridge::new(gossip.clone(), topic);
+    let (sender, receiver) = bridge.join(peer_ids).await?;
+
+    // Set up job store and queue protocol handler
+    let store = JobStore::new();
+    let queue_handler = QueueProtocol::new(store.clone());
+
+    // Local channel so the co-located consumer hears about its own producer's jobs
+    // (gossip doesn't deliver messages back to the sender)
+    let (local_tx, local_rx) = tokio::sync::mpsc::unbounded_channel();
+
+    // Create producer
+    let consumer_store = store.clone();
+    let producer = Arc::new(Producer::new(
+        store,
+        sender.clone(),
+        local_tx,
+        own_id,
+        Duration::from_secs(120),
+    ));
+
+    // Start stale job reaper
+    let reaper = producer.clone();
+    tokio::spawn(async move { reaper.run_reaper().await });
+
+    // Create DistributedContext and SessionContext
+    let dist_ctx = DistributedContext::new(endpoint.clone(), producer);
     let config = SessionConfig::new()
         .set_bool("datafusion.optimizer.enable_dynamic_filter_pushdown", false)
         .with_extension(Arc::new(dist_ctx));
@@ -221,20 +240,22 @@ async fn main() -> Result<()> {
         anyhow::bail!("provide either --table-path or --dataset-dir");
     }
 
-    // Build router with both protocol handlers on the same endpoint
-    let plan_handler = df_p2p::worker::plan_protocol_handler(ctx.clone());
-    let query_handler = IrohArrow::new(SqlQueryHandler {
-        ctx,
-        peers_dir,
-        own_id,
-    });
+    // Create consumer and spawn worker loop
+    // Pass local_store so the consumer can claim/ack local jobs directly
+    // (iroh doesn't support self-connections)
+    let consumer = Consumer::new(endpoint.clone(), receiver, sender, local_rx, consumer_store);
+    let _worker = Worker::spawn(ctx.clone(), consumer);
+
+    // Build router with queue + gossip + query protocols
+    let query_handler = IrohArrow::new(SqlQueryHandler { ctx });
 
     let router = Router::builder(endpoint)
-        .accept(ALPN, plan_handler)
+        .accept(queue::QUEUE_ALPN, queue_handler)
+        .accept(iroh_gossip::ALPN, gossip.clone())
         .accept(QUERY_ALPN, query_handler)
         .spawn();
 
-    info!(%own_id, "peer listening, waiting for queries (Ctrl+C to stop)");
+    info!(%own_id, "peer listening with dynamic queue scheduling (Ctrl+C to stop)");
 
     tokio::signal::ctrl_c().await?;
     info!("shutting down");
