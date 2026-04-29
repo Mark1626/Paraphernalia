@@ -15,7 +15,7 @@ pub mod ffi {
 mod db;
 mod record;
 mod rset;
-mod sex;
+mod selection_expression;
 
 #[cfg(feature = "arrow")]
 pub mod arrow;
@@ -23,7 +23,7 @@ pub mod arrow;
 pub use db::Db;
 pub use record::{FieldRef, Fields, Record, RecordRef};
 pub use rset::{Records, Rset};
-pub use sex::Sex;
+pub use selection_expression::SelectionExpression;
 
 use std::ffi::CString;
 use std::fmt;
@@ -78,21 +78,21 @@ Author: Eric Evans
     }
 
     #[test]
-    fn sex_filters() {
+    fn selection_expression_filters() {
         let mut db = Db::parse_str(SAMPLE).unwrap();
         let rset = db.rset_by_type("Book").unwrap();
-        let sex = Sex::compile("Author = 'Eric Evans'", false).unwrap();
-        let hits = rset.records().filter(|r| sex.matches(r)).count();
+        let selection_expression = SelectionExpression::compile("Author = 'Eric Evans'", false).unwrap();
+        let hits = rset.records().filter(|r| selection_expression.matches(r)).count();
         assert_eq!(hits, 1);
     }
 
     #[test]
     fn set_field_updates_matching() {
         let mut db = Db::parse_str(SAMPLE).unwrap();
-        let sex = Sex::compile("Author = 'Eric Evans'", false).unwrap();
+        let selection_expression = SelectionExpression::compile("Author = 'Eric Evans'", false).unwrap();
         let rset = db.rset_by_type("Book").unwrap();
         let mut updated = 0;
-        for mut r in rset.records().filter(|r| sex.matches(r)) {
+        for mut r in rset.records().filter(|r| selection_expression.matches(r)) {
             assert!(r.set_field("Author", "Evans, Eric").unwrap());
             updated += 1;
         }
@@ -105,10 +105,10 @@ Author: Eric Evans
     #[test]
     fn remove_matching_drops_records() {
         let mut db = Db::parse_str(SAMPLE).unwrap();
-        let sex = Sex::compile("Author = 'Martin Fowler'", false).unwrap();
+        let selection_expression = SelectionExpression::compile("Author = 'Martin Fowler'", false).unwrap();
         let removed = {
             let mut rset = db.rset_by_type("Book").unwrap();
-            rset.remove_matching(|r| sex.matches(r))
+            rset.remove_matching(|r| selection_expression.matches(r))
         };
         assert_eq!(removed, 1);
         assert_eq!(db.rset_by_type("Book").unwrap().num_records(), 1);

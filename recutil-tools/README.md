@@ -11,7 +11,7 @@ published independently to crates.io.
 
 - Raw bindings under `recutils_rs::ffi` (generated via `bindgen`)
 - Safe types at the crate root: `Db`, `Rset`, `Record`, `RecordRef`,
-  `Fields`, `FieldRef`, `Sex`, `Error`
+  `Fields`, `FieldRef`, `SelectionExpression`, `Error`
 - Lazy `rec_init` via `std::sync::Once`
 - Optional `arrow` feature: exposes `recutils_rs::arrow::rec_to_record_batch`
   for rec → Apache Arrow `RecordBatch` conversion. Off by default.
@@ -50,8 +50,10 @@ case-folded by default (ANSI SQL behavior) — quote field names that use
 mixed case (e.g. `"Year"`) or the table name (e.g. `"Book"`) to preserve
 casing.
 
-Filter pushdown to recutils' Sex engine is planned but not yet wired up;
-today all filtering happens above the provider in DataFusion.
+Filter pushdown to recutils' selection-expression engine translates a
+subset of SQL `WHERE` predicates (comparisons + `AND`/`OR`/`NOT`) into
+selection-expression syntax and applies them at the librec layer; the
+remainder is evaluated by DataFusion above the provider.
 
 ## Build
 

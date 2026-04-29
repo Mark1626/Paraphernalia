@@ -1,6 +1,6 @@
 use std::fs;
 
-use recutils_rs::{Db, Sex};
+use recutils_rs::{Db, SelectionExpression};
 
 fn main() {
     let mut args = std::env::args().skip(1);
@@ -16,10 +16,11 @@ fn main() {
     let rset = db
         .rset_by_type(&rset_type)
         .unwrap_or_else(|| panic!("no record set of type {rset_type:?}"));
-    let sex = Sex::compile(&expr, false).expect("compile selection expression");
+    let selection_expression =
+        SelectionExpression::compile(&expr, false).expect("compile selection expression");
 
     let mut matches = 0usize;
-    for record in rset.records().filter(|r| sex.matches(r)) {
+    for record in rset.records().filter(|r| selection_expression.matches(r)) {
         matches += 1;
         for field in record.fields() {
             println!("{}: {}", field.name(), field.value());

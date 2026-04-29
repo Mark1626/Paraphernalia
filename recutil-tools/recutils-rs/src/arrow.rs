@@ -10,7 +10,7 @@ use arrow::array::{ArrayRef, BooleanBuilder, Float64Builder, Int64Builder, Strin
 use arrow::datatypes::{DataType, Field, Schema};
 use arrow::record_batch::RecordBatch;
 
-use crate::Db;
+use crate::{Db, SelectionExpression};
 
 pub fn rec_to_record_batch(
     db: &mut Db,
@@ -38,6 +38,47 @@ pub fn rec_to_record_batch(
     let columns = build_columns(&schema, &rows);
     let batch = RecordBatch::try_new(Arc::clone(&schema), columns)?;
     Ok((schema, batch))
+}
+
+/// Build a [`RecordBatch`] for the records of `record_type` that match the
+/// given selection expression, using the caller-provided `schema` (so the
+/// column set stays stable even when the filter excludes every record that
+/// has a particular field).
+pub fn rec_to_filtered_batch(
+    db: &mut Db,
+    record_type: &str,
+    schema: &Arc<Schema>,
+    selection_expression: &SelectionExpression,
+) -> Result<RecordBatch, Box<dyn std::error::Error>> {
+    let rset = db
+        .rset_by_type(record_type)
+        .ok_or_else(|| format!("no record set of type {record_type:?}"))?;
+
+    let mut rows: Vec<HashMap<String, String>> = Vec::new();
+    for (i, record) in rset.records().enumerate() {
+        if !selection_expression.matches(&record) {
+            continue;
+        }
+        let mut row: HashMap<String, String> = HashMap::new();
+        for f in record.fields() {
+            let name = f.name();
+            if name.starts_with('%') {
+                continue;
+            }
+            if row.contains_key(&name) {
+                return Err(format!(
+                    "field {:?} repeated in record {} (1-based); use a List<T> mapping (not yet supported) or remove the repeat",
+                    name,
+                    i + 1
+                )
+                .into());
+            }
+            row.insert(name.clone(), f.value());
+        }
+        rows.push(row);
+    }
+    let columns = build_columns(schema, &rows);
+    Ok(RecordBatch::try_new(Arc::clone(schema), columns)?)
 }
 
 pub fn split_type_decl(value: &str) -> Option<(String, String)> {

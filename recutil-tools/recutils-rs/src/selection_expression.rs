@@ -3,11 +3,11 @@ use crate::record::RecordRef;
 use crate::{Error, cstring, ensure_init};
 
 /// A compiled selection expression — equivalent to `recsel -e <expr>`.
-pub struct Sex {
+pub struct SelectionExpression {
     ptr: rec_sex_t,
 }
 
-impl Sex {
+impl SelectionExpression {
     pub fn compile(expr: &str, case_insensitive: bool) -> Result<Self, Error> {
         ensure_init();
         let c_expr = cstring(expr, "selection expression")?;
@@ -20,7 +20,7 @@ impl Sex {
                 rec_sex_destroy(ptr);
                 return Err(Error::new(format!("failed to compile expression {expr:?}")));
             }
-            Ok(Sex { ptr })
+            Ok(SelectionExpression { ptr })
         }
     }
 
@@ -31,7 +31,7 @@ impl Sex {
     }
 }
 
-impl Drop for Sex {
+impl Drop for SelectionExpression {
     fn drop(&mut self) {
         unsafe { rec_sex_destroy(self.ptr) }
     }

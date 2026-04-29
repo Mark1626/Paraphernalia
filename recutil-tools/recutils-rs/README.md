@@ -7,7 +7,8 @@ The crate ships two layers:
 - A raw `unsafe` FFI under `recutils_rs::ffi`, generated at build time by
   `bindgen` from `<rec.h>` — covers the full `rec_*` / `REC_*` / `MSET_*`
   surface.
-- A small safe wrapper at the crate root (`Db`, `Rset`, `Record`, `Sex`, …)
+- A small safe wrapper at the crate root (`Db`, `Rset`, `Record`,
+  `SelectionExpression`, …)
   that the bundled examples use. It only covers what those examples need; for
   anything else, drop down to `recutils_rs::ffi::*`.
 
@@ -52,15 +53,19 @@ Search order: `RECUTILS_PREFIX` → individual `_INCLUDE_DIR` / `_LIB_DIR` →
 ## Usage
 
 ```rust
-use recutils_rs::{Db, Record, Sex};
+use recutils_rs::{Db, Record, SelectionExpression};
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let mut db = Db::parse_str("%rec: Book\n\nTitle: Refactoring\nAuthor: Martin Fowler\n")?;
 
     // Query with a recutils selection expression.
-    let sex = Sex::compile("Author = 'Martin Fowler'", false)?;
+    let selection_expression =
+        SelectionExpression::compile("Author = 'Martin Fowler'", false)?;
     let rset = db.rset_by_type("Book").unwrap();
-    let hits = rset.records().filter(|r| sex.matches(r)).count();
+    let hits = rset
+        .records()
+        .filter(|r| selection_expression.matches(r))
+        .count();
     println!("matches: {hits}");
 
     // Build and append a new record, then re-serialize.
@@ -76,7 +81,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
 `librec` is initialized lazily via `std::sync::Once` on first use of any safe
 type — there is no manual init/fini to track. Drop handles cleanup for `Db`,
-`Record` (when not transferred), `Sex`, and the iterators.
+`Record` (when not transferred), `SelectionExpression`, and the iterators.
 
 Reach into `recutils_rs::ffi` for the raw C API when the safe layer doesn't
 yet cover what you need.

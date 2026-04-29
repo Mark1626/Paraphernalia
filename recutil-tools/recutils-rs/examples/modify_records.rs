@@ -1,7 +1,7 @@
 use std::fs;
 use std::process::ExitCode;
 
-use recutils_rs::{Db, Sex};
+use recutils_rs::{Db, SelectionExpression};
 
 fn usage() -> ! {
     eprintln!(
@@ -21,7 +21,8 @@ fn main() -> ExitCode {
 
     let text = fs::read_to_string(&path).expect("read file");
     let mut db = Db::parse_str(&text).expect("parse");
-    let sex = Sex::compile(&expr, false).expect("compile selection expression");
+    let selection_expression =
+        SelectionExpression::compile(&expr, false).expect("compile selection expression");
 
     let summary = {
         let mut rset = db
@@ -36,7 +37,7 @@ fn main() -> ExitCode {
                     .unwrap_or_else(|| panic!("expected Field=Value, got {pair:?}"));
                 let mut updated = 0usize;
                 let mut missing = 0usize;
-                for mut record in rset.records().filter(|r| sex.matches(r)) {
+                for mut record in rset.records().filter(|r| selection_expression.matches(r)) {
                     match record.set_field(field, value).expect("set field") {
                         true => updated += 1,
                         false => missing += 1,
@@ -47,7 +48,7 @@ fn main() -> ExitCode {
                 )
             }
             "delete" => {
-                let removed = rset.remove_matching(|r| sex.matches(r));
+                let removed = rset.remove_matching(|r| selection_expression.matches(r));
                 format!("deleted {removed} record(s)")
             }
             other => {
