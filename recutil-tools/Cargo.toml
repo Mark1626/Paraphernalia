@@ -1,7 +1,0 @@
-[workspace]
-resolver = "2"
-members = [
-    "recutils-rs",
-    "rec2parquet",
-    "recsql",
-]
