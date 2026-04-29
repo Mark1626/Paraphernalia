@@ -1,0 +1,24 @@
+[package]
+name = "recsql"
+version = "0.1.0"
+edition = "2024"
+description = "Query GNU recutils .rec files with SQL via Apache DataFusion"
+license = "GPL-3.0-or-later"
+
+[lib]
+name = "recsql"
+path = "src/lib.rs"
+
+[[bin]]
+name = "recsql"
+path = "src/main.rs"
+
+[dependencies]
+recutils-rs = { path = "../recutils-rs", version = "0.1", features = ["arrow"] }
+arrow = "58"
+datafusion = "53"
+tokio = { version = "1", features = ["macros", "rt-multi-thread"] }
+async-trait = "0.1"
+clap = { version = "4", features = ["derive"] }
+log = "0.4"
+env_logger = "0.11"
