@@ -1,0 +1,10 @@
+[package]
+name = "onion"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+ascii85 = "0.2.1"
+aes = "0.9"
+ctr = "0.10.0"
+anyhow = "1.0.102"
