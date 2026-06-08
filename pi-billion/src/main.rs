@@ -10,25 +10,35 @@ use parquet::arrow::ArrowWriter;
 use parquet::basic::{Compression, Encoding};
 use parquet::file::properties::WriterProperties;
 
-const WINDOW: usize = 9;
+/// Default sliding-window width (digits per row).
+const DEFAULT_WINDOW: usize = 17;
 /// Rows built per Arrow RecordBatch before handing off to the Parquet writer.
-const BATCH_ROWS: usize = 1 << 20; // ~1M rows -> ~13MB working buffers
+const BATCH_ROWS: usize = 1 << 20; // ~1M rows
 
 struct Args {
     input: String,
     output: String,
+    window: usize,
     limit: Option<usize>,
 }
 
 fn parse_args() -> Args {
     let mut input = "pi-billion.txt".to_string();
     let mut output = "pi-windows.parquet".to_string();
+    let mut window = DEFAULT_WINDOW;
     let mut limit = None;
     let mut it = std::env::args().skip(1);
     while let Some(a) = it.next() {
         match a.as_str() {
             "--input" | "-i" => input = it.next().expect("--input needs a value"),
             "--output" | "-o" => output = it.next().expect("--output needs a value"),
+            "--window" | "-w" => {
+                window = it
+                    .next()
+                    .expect("--window needs a value")
+                    .parse()
+                    .expect("--window must be an integer")
+            }
             "--limit" | "-n" => {
                 limit = Some(
                     it.next()
@@ -40,7 +50,13 @@ fn parse_args() -> Args {
             other => panic!("unknown arg: {other}"),
         }
     }
-    Args { input, output, limit }
+    assert!(window >= 1, "--window must be >= 1");
+    // Per-batch string offsets are i32, so a batch's bytes must fit in i32.
+    assert!(
+        BATCH_ROWS * window <= i32::MAX as usize,
+        "--window {window} too large for batch size {BATCH_ROWS}"
+    );
+    Args { input, output, window, limit }
 }
 
 fn main() {
@@ -62,9 +78,10 @@ fn main() {
         }
         &digits[..end]
     };
-    assert!(digits.len() >= WINDOW, "need at least {WINDOW} digits");
+    let window = args.window;
+    assert!(digits.len() >= window, "need at least {window} digits");
 
-    let total_windows = digits.len() - WINDOW + 1;
+    let total_windows = digits.len() - window + 1;
     let n_windows = match args.limit {
         Some(l) => total_windows.min(l),
         None => total_windows,
@@ -73,7 +90,7 @@ fn main() {
         "digits after decimal: {}, emitting {} windows of width {}",
         digits.len(),
         n_windows,
-        WINDOW
+        window
     );
 
     let schema = Arc::new(Schema::new(vec![
@@ -96,7 +113,7 @@ fn main() {
     let mut done = 0usize;
     while done < n_windows {
         let rows = BATCH_ROWS.min(n_windows - done);
-        let batch = build_batch(digits, done, rows, &schema);
+        let batch = build_batch(digits, done, rows, window, &schema);
         writer.write(&batch).expect("write batch");
         done += rows;
         if done % (BATCH_ROWS * 64) == 0 || done == n_windows {
@@ -115,17 +132,23 @@ fn main() {
     println!("done in {:.1}s -> {}", start.elapsed().as_secs_f64(), args.output);
 }
 
-/// Build a RecordBatch of `rows` windows starting at digit index `start`.
-fn build_batch(digits: &[u8], start: usize, rows: usize, schema: &Arc<Schema>) -> RecordBatch {
-    // Values are stored back-to-back: row i occupies bytes [i*9 .. i*9+9].
-    let mut values = vec![0u8; rows * WINDOW];
+/// Build a RecordBatch of `rows` windows of width `window` starting at digit index `start`.
+fn build_batch(
+    digits: &[u8],
+    start: usize,
+    rows: usize,
+    window: usize,
+    schema: &Arc<Schema>,
+) -> RecordBatch {
+    // Values are stored back-to-back: row i occupies bytes [i*window .. i*window+window].
+    let mut values = vec![0u8; rows * window];
     for i in 0..rows {
         let src = start + i;
-        values[i * WINDOW..i * WINDOW + WINDOW].copy_from_slice(&digits[src..src + WINDOW]);
+        values[i * window..i * window + window].copy_from_slice(&digits[src..src + window]);
     }
 
-    // Offsets: 0, 9, 18, ..., rows*9.
-    let offsets: Vec<i32> = (0..=rows).map(|i| (i * WINDOW) as i32).collect();
+    // Offsets: 0, window, 2*window, ..., rows*window.
+    let offsets: Vec<i32> = (0..=rows).map(|i| (i * window) as i32).collect();
 
     let offsets = OffsetBuffer::new(ScalarBuffer::from(offsets));
     let values = Buffer::from_vec(values);

@@ -20,6 +20,13 @@ Postgres Performance Studies and Benchmarks will be [here](https://github.com/Ma
 
 - [N Queens backtrack](./bktrack/)
 - [Graph Algorithms](./graphs/)
+- [MLCP backtrack algorithms](./backtrk/)
+
+---
+
+#### Puzzles
+
+- [Tom's Onion Data](./onion)
 
 ---
 
@@ -110,6 +117,7 @@ Postgres Performance Studies and Benchmarks will be [here](https://github.com/Ma
 - [Datafusion P2P Distribution](./df-p2p/)
 - [TPC-DS Data Generation](./tpcds-delta/)
 - [Iceberg hidden partition generator](./iceberg-hidden-partition/)
+- [Billion Pi Digit challenge](./pi-billion/)
 
 ---
 
@@ -184,6 +192,12 @@ Postgres Performance Studies and Benchmarks will be [here](https://github.com/Ma
 ### TLA+
 
 - [TLA+ Formal Specifications](./tla-exp/)
+
+---
+
+### k
+
+- [k experiments](./kexp/)
 
 ---
 
