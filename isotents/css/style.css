@@ -1,0 +1,179 @@
+/* Palette lifted from the medieval sprite pack:
+   outline  #2c2330   parchment #efe0bd / #e6d2a6
+   wood     #b46c38   grass #6aab43   terracotta #cf6a3f   roof-blue #4f90e0
+   Flat colours throughout to match the flat pixel-art sprites. */
+
+@font-face {
+  font-family: "Press Start 2P";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("../assets/fonts/PressStart2P-Regular.ttf") format("truetype");
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  background: #2c2330;
+  overflow: hidden;
+  font-family: "Trebuchet MS", "Segoe UI", system-ui, sans-serif;
+}
+
+canvas {
+  display: block;
+}
+
+.hidden {
+  display: none !important;
+}
+
+/* ── In-game top bar ──────────────────────────────────────── */
+#topbar {
+  position: fixed;
+  top: 12px;
+  right: 12px;
+  display: flex;
+  gap: 8px;
+  z-index: 10;
+}
+
+#topbar button {
+  background: #b46c38;
+  color: #f6ecd2;
+  border: 2px solid #2c2330;
+  border-radius: 7px;
+  padding: 7px 13px;
+  font: bold 13px "Trebuchet MS", system-ui, sans-serif;
+  text-shadow: 0 1px 0 rgba(0, 0, 0, 0.4);
+  cursor: pointer;
+}
+
+#topbar button:hover {
+  background: #c8803f;
+}
+
+#topbar button:active {
+  transform: translateY(1px);
+}
+
+/* ── Menu / level select ──────────────────────────────────── */
+#menu {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  /* Flat outdoor green backdrop. */
+  background: #44603a;
+}
+
+.menu-card {
+  width: min(92vw, 390px);
+  padding: 30px 26px 26px;
+  border-radius: 12px;
+  background: #efe0bd;
+  /* Dark sprite outline + an inner wood frame. */
+  border: 4px solid #2c2330;
+  box-shadow:
+    0 0 0 4px #b86b3f inset,
+    0 18px 50px rgba(0, 0, 0, 0.55);
+  text-align: center;
+  color: #2c2330;
+}
+
+.menu-card h1 {
+  font-family: "Press Start 2P", "Courier New", monospace;
+  font-size: 22px;
+  line-height: 1.3;
+  color: #2c2330;
+  text-shadow: 2px 2px 0 #cf6a3f;
+}
+
+.menu-card .subtitle {
+  margin-top: 10px;
+  color: #8a4e2c;
+  font-size: 12px;
+  letter-spacing: 5px;
+  text-transform: uppercase;
+}
+
+.resume {
+  margin-top: 22px;
+  width: 100%;
+  padding: 12px 16px;
+  border-radius: 8px;
+  border: 3px solid #2c2330;
+  background: #6aab43;
+  color: #f6ecd2;
+  font: bold 15px "Trebuchet MS", system-ui, sans-serif;
+  text-shadow: 0 1px 0 rgba(0, 0, 0, 0.4);
+  cursor: pointer;
+}
+
+.resume:hover {
+  background: #7cb851;
+}
+
+.levels {
+  margin: 18px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.levels button {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+  border-radius: 8px;
+  border: 3px solid #2c2330;
+  background: #b46c38;
+  color: #f6ecd2;
+  font: bold 15px "Trebuchet MS", system-ui, sans-serif;
+  text-shadow: 0 1px 0 rgba(0, 0, 0, 0.4);
+  cursor: pointer;
+  transition: background 0.12s, box-shadow 0.12s, transform 0.06s;
+}
+
+.levels button:hover {
+  background: #c8803f;
+  box-shadow: 0 0 0 2px rgba(140, 193, 82, 0.75) inset;
+}
+
+.levels button:active {
+  transform: translateY(1px);
+}
+
+.levels button .size {
+  color: #ffe7bb;
+  font: bold 12px "Press Start 2P", "Courier New", monospace;
+  font-size: 10px;
+  opacity: 0.85;
+}
+
+.reveal {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: #6e4a2e;
+  font-size: 13px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.reveal input {
+  accent-color: #5f9a3a;
+}
+
+.menu-card .hint {
+  margin-top: 18px;
+  color: #8a6a47;
+  font-size: 11px;
+  line-height: 1.6;
+}

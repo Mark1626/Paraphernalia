@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Isometric Tents</title>
+        <link rel="stylesheet" href="css/style.css" />
+    </head>
+    <body>
+        <canvas id="game"></canvas>
+
+        <!-- Background music (AAC audio inside the mp4 container) -->
+        <audio id="bgm" src="assets/sounds/10.mp4" loop preload="auto"></audio>
+        <!-- Click sound effect -->
+        <audio id="sfx" src="assets/sounds/click.mp4" preload="auto"></audio>
+
+        <!-- In-game top bar -->
+        <div id="topbar" class="hidden">
+            <button id="menuBtn" type="button">☰ Menu</button>
+            <button id="muteBtn" type="button" title="Toggle music">♪</button>
+        </div>
+
+        <!-- Menu / level-select screen -->
+        <div id="menu">
+            <div class="menu-card">
+                <h1>Isotents</h1>
+                <p class="subtitle">Tents &amp; Trees</p>
+                <button id="resumeBtn" class="resume hidden" type="button">
+                    Resume
+                </button>
+                <div id="levelList" class="levels"></div>
+                <label class="reveal">
+                    <input type="checkbox" id="revealToggle" />
+                    Reveal solution (cheat)
+                </label>
+                <p class="hint">
+                    Left-click: house · Right-click / drag: mark empty ·
+                    N: new · R: reset
+                </p>
+            </div>
+        </div>
+
+        <script type="module" src="js/main.js"></script>
+    </body>
+</html>

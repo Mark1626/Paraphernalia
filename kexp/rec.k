@@ -1,3 +1,4 @@
+/ ngn/k
 / rec.k - parse a GNU recutils file into a list of dictionaries
 / usage:
 /   \l rec.k
