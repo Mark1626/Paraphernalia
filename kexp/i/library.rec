@@ -1,0 +1,85 @@
+%rec: Author
+%type: Born int
+
+Name: Aho
+Born: 1941
+Country: Canada
+
+Name: Abelson
+Born: 1947
+Country: USA
+
+Name: Knuth
+Born: 1938
+Country: USA
+
+Name: Kernighan
+Born: 1942
+Country: Canada
+
+%rec: Book
+%type: Year int
+%type: Pages int
+
+Title: Compilers
+Author: Aho
+Year: 1986
+Genre: textbook
+Pages: 1009
+
+Title: SICP
+Author: Abelson
+Year: 1985
+Genre: textbook
+Pages: 657
+
+Title: TAOCP Vol 1
+Author: Knuth
+Year: 1968
+Genre: textbook
+Pages: 650
+
+Title: TAOCP Vol 2
+Author: Knuth
+Year: 1969
+Genre: textbook
+Pages: 688
+
+Title: The C Programming Language
+Author: Kernighan
+Year: 1978
+Genre: reference
+Pages: 228
+
+Title: The Practice of Programming
+Author: Kernighan
+Year: 1999
+Genre: reference
+Pages: 267
+
+%rec: Loan
+%type: Days int
+
+Book: SICP
+Borrower: alice
+Days: 14
+
+Book: SICP
+Borrower: bob
+Days: 21
+
+Book: Compilers
+Borrower: alice
+Days: 30
+
+Book: TAOCP Vol 1
+Borrower: carol
+Days: 7
+
+Book: The C Programming Language
+Borrower: bob
+Days: 10
+
+Book: The C Programming Language
+Borrower: alice
+Days: 5

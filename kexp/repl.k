@@ -6,6 +6,8 @@
  dsep: "•▶▷○◇"![3]+3*4                                                                                                                      / choice the separator for dicts
  in: {(z<y)&z>x}                                                                                                                            / exclusive interval
  b2i: {x+256*0>x}                                                                                                                           / byte(s) to int - solves issue about neg numbs w/ chars over 127
+ qk: {"\"",(,/{$[x="\"";"\\\"";x="\\";"\\\\";x="\n";"\\n";x="\t";"\\t";x="\r";"\\r";,x]}'x),"\""}                                            / utf8-safe quote: escape only ascii ctrl/quote bytes, pass high bytes raw
+ uk: {$[`C~@x;qk x;`k x]}                                                                                                                    / like `k but preserves utf8 char vectors instead of hexifying them
  ulen: +/~in[127;192]b2i@                                                                                                                   / length of utf8 str - discards data bytes and counts just initiators
 
  ucut: {#[y]^*&x<+\~box.in[127;192]box.b2i@y}                                                                                               / gives str index of x-th uchar
@@ -27,13 +29,13 @@
  matsh: {vcat/hcat/'box''mpad''[confsz@x;x]}                                                                                                / accepts a matrix of char tiles
  dicsh: {A:+(x;(#x)#,,dsep@0N,(!3),0N;y);vcat/box',/''+'mpad''[confsz[A];A]}
  tablim: {$[x<#y;(-[x;1]#y),,#[*y]#,,"⋮";y]}                                                                                                / limits a char matrix representing a table to x rows adding ⋮ when needed
- tabsh: {a:tablim[-5+lines]@,''`k''(!x;@'.*x),+.x;mp:mpad''[confsz@a;a];vcat[hcat/box',/'+2#mp;hcat/{box@*'x}'+2_mp]}
+ tabsh: {a:tablim[-5+lines]@,''uk''(!x;@'.*x),+.x;mp:mpad''[confsz@a;a];vcat[hcat/box',/'+2#mp;hcat/{box@*'x}'+2_mp]}
 
  scrspl: *{#*x@1}{(ts;t):x;c:box.ucut[cols]'t;(ts,c#'t;c_'t)}/,[,();]@,:                                                                    / split a tile to show it seq on the screen
  mx: {&[1~#?@'x;1~#?#'x]}                                                                                                                   / tests if an array is a matrix
  smx: {|/`S`F`I`C=@*x}                                                                                                                      / tests if a matrix is a "scalar" matrix
  smxsh: {x:,''`k''x;-1_',/',/'box.mpad''[0 1+/:/:box.confsz[x];x]}
- repr: {$[(::)~x;(); `m~@x;dicsh[o'!x;o'.x]; `M~@x;tabsh@x; `A~@x;$[1=#x;box@o@*x;mx@x;$[smx@x;smxsh@x;matsh@o''x];matsh@,o'x]; ,`k@x]}        / gives a tile representing x
+ repr: {$[(::)~x;(); `m~@x;dicsh[o'!x;o'.x]; `M~@x;tabsh@x; `A~@x;$[1=#x;box@o@*x;mx@x;$[smx@x;smxsh@x;matsh@o''x];matsh@,o'x]; ,uk@x]}        / gives a tile representing x
 
  shw:{box.upd[];$[`M~@x;{$[cols<ulen[x];((ucut[cols-1]@x)#x),"⋯";x]}';scrspl]repr@x}
 
