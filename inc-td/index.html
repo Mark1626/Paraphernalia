@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Incremental Tower Defense</title>
+    <style>
+      :root {
+        --panel: #1c2a1c;
+        --ink: #e8f0e0;
+        --accent: #c9b06b;
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 20px;
+        background: #101810;
+        color: var(--ink);
+        font-family: system-ui, sans-serif;
+      }
+      .stage {
+        position: relative;
+        width: 640px;
+        height: 640px;
+      }
+      canvas {
+        display: block;
+        background: #0c140c;
+        border-radius: 8px;
+      }
+      /* HUD */
+      #hud {
+        position: absolute;
+        top: 12px;
+        left: 12px;
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 6px;
+        font-weight: 700;
+        text-shadow: 0 1px 2px #000;
+        pointer-events: none;
+      }
+      #hud .hud-row {
+        display: flex;
+        gap: 12px;
+      }
+      #hud span {
+        background: rgba(0, 0, 0, 0.45);
+        padding: 4px 10px;
+        border-radius: 6px;
+      }
+      /* Timer lines sit below the round row and read a touch smaller/dimmer. */
+      #hud-time,
+      #hud-total {
+        font-size: 12px;
+        font-weight: 600;
+        font-variant-numeric: tabular-nums;
+      }
+      /* Batch progress bar (top-center) */
+      #progress {
+        position: absolute;
+        top: 14px;
+        left: 50%;
+        transform: translateX(-50%);
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        padding: 8px 16px;
+        background: rgba(0, 0, 0, 0.45);
+        border-radius: 20px;
+        pointer-events: none;
+      }
+      .pmark {
+        width: 18px;
+        height: 18px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: 2px solid #4a6b4a;
+        background: transparent;
+        color: #cfe0cf;
+        font-size: 10px;
+        font-weight: 700;
+        position: relative;
+      }
+      .pmark.circle { border-radius: 50%; }
+      .pmark.diamond { transform: rotate(45deg); border-color: #b06bc9; border-radius: 3px; }
+      .pmark.diamond span { transform: rotate(-45deg); } /* keep the number upright */
+      /* Completed rounds: filled. Current: bright ring. Upcoming: dim outline. */
+      .pmark.done { background: #3c6b3c; border-color: #5fbf5f; color: #eaffea; }
+      .pmark.diamond.done { background: #7a3c8f; border-color: #d19bff; }
+      .pmark.current { border-color: var(--accent); box-shadow: 0 0 8px var(--accent); color: #fff; }
+      /* Speed toggle (top-right over the canvas) */
+      #speed-toggle {
+        position: absolute;
+        top: 14px;
+        right: 14px;
+        background: rgba(0, 0, 0, 0.5);
+        color: var(--ink);
+        border: 1px solid #3c6b3c;
+        border-radius: 6px;
+        padding: 6px 12px;
+        font: 700 13px system-ui, sans-serif;
+        cursor: pointer;
+      }
+      #speed-toggle:hover { border-color: var(--accent); }
+      #speed-toggle.fast { background: #2b4a2b; border-color: var(--accent); color: #fff; }
+      /* Mute toggle (below the speed button) */
+      #mute-toggle {
+        position: absolute;
+        top: 50px;
+        right: 14px;
+        background: rgba(0, 0, 0, 0.5);
+        color: var(--ink);
+        border: 1px solid #3c6b3c;
+        border-radius: 6px;
+        padding: 6px 12px;
+        font: 700 13px system-ui, sans-serif;
+        cursor: pointer;
+      }
+      #mute-toggle:hover { border-color: var(--accent); }
+      #mute-toggle.muted { opacity: 0.6; border-color: #6b3c3c; }
+      /* Stats panel */
+      #stats {
+        width: 230px; /* fixed so the panel never resizes as values change */
+        background: var(--panel);
+        border: 2px solid #2f452f;
+        border-radius: 8px;
+        padding: 16px;
+      }
+      #stats h2 {
+        margin: 0 0 12px;
+        font-size: 16px;
+        color: var(--accent);
+      }
+      #stats div {
+        display: flex;
+        justify-content: space-between;
+        gap: 8px;
+        padding: 5px 0;
+        border-bottom: 1px solid #26382660;
+        font-size: 14px;
+      }
+      /* Value cells: fixed-width digits + right-aligned + no wrap so the label
+         never shifts and the row never reflows tick-to-tick. */
+      #stats div span:last-child {
+        font-variant-numeric: tabular-nums;
+        text-align: right;
+        white-space: nowrap;
+        flex: 0 0 auto;
+      }
+      #stats div span:first-child {
+        white-space: nowrap;
+      }
+      /* Reward overlay */
+      #overlay {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 20px;
+        background: rgba(6, 12, 6, 0.82);
+        border-radius: 8px;
+      }
+      #overlay.hidden { display: none; }
+      #overlay-title {
+        margin: 0;
+        font-size: 22px;
+        color: var(--accent);
+      }
+      #cards { display: flex; gap: 16px; }
+      .card {
+        width: 150px;
+        min-height: 120px;
+        background: var(--panel);
+        border: 2px solid #3c6b3c;
+        border-radius: 10px;
+        color: var(--ink);
+        cursor: pointer;
+        padding: 14px;
+        text-align: left;
+        font: inherit;
+        transition: transform 0.08s, border-color 0.08s;
+      }
+      .card:hover { transform: translateY(-4px); border-color: var(--accent); }
+      .card.trait { border-color: #b06bc9; }
+      .card.trait:hover { border-color: #e0a8ff; }
+      /* Upgrade rarity: regular cards are Silver; rare Golden cards apply 3x. */
+      .card.silver { border-color: #8fa0ab; }
+      .card.silver:hover { border-color: #c8d6de; }
+      .card.golden { border-color: #e0b93c; box-shadow: 0 0 14px rgba(224, 185, 60, 0.4); }
+      .card.golden:hover { border-color: #ffd75e; }
+      .card .badge {
+        display: inline-block;
+        margin-bottom: 8px;
+        padding: 2px 6px;
+        border-radius: 4px;
+        font-size: 10px;
+        font-weight: 700;
+        letter-spacing: 0.6px;
+        background: #46545e;
+        color: #d6e2ea;
+      }
+      .card .badge.gold { background: #5a4a14; color: #ffd75e; }
+      .card h3 { margin: 0 0 8px; font-size: 15px; }
+      .card p { margin: 0; font-size: 13px; opacity: 0.85; }
+    </style>
+  </head>
+  <body>
+    <div class="stage">
+      <canvas id="game" width="640" height="640"></canvas>
+      <div id="hud">
+        <div class="hud-row">
+          <span id="hud-round">Round 1</span>
+          <span id="hud-hp">HP 10/10</span>
+        </div>
+        <span id="hud-time">⏱ 0.0s wall · 0.0s game</span>
+        <span id="hud-total">🕒 Total 0:00</span>
+      </div>
+      <!-- Batch progress: 4 circles (normal rounds) + 1 diamond (every 5th). -->
+      <div id="progress">
+        <div class="pmark circle"><span>1</span></div>
+        <div class="pmark circle"><span>2</span></div>
+        <div class="pmark circle"><span>3</span></div>
+        <div class="pmark circle"><span>4</span></div>
+        <div class="pmark diamond"><span>5</span></div>
+      </div>
+      <button id="speed-toggle">Speed 1×</button>
+      <button id="mute-toggle">🔊 Sound</button>
+      <div id="overlay" class="hidden">
+        <h2 id="overlay-title"></h2>
+        <div id="cards"></div>
+      </div>
+    </div>
+
+    <div id="stats">
+      <h2>Tower</h2>
+      <div><span>Damage</span><span id="stat-damage">5</span></div>
+      <div><span>Fire rate</span><span id="stat-firerate">1.00</span></div>
+      <div><span>MS proc/arrows/dmg</span><span id="stat-ms">—</span></div>
+      <div><span>Frost proc/slow/dur</span><span id="stat-frost">—</span></div>
+      <div><span>Fire proc/dps/dur</span><span id="stat-fire">—</span></div>
+      <div><span>Traits</span><span id="stat-traits">—</span></div>
+    </div>
+
+    <script type="module" src="src/main.js"></script>
+  </body>
+</html>
