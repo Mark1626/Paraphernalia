@@ -1,0 +1,137 @@
+%rec: GameMetadata
+
+max_time: 60
+
+%rec: GameData
+
+id: 0
+title: Wakeup
+description: You wake up in a mysterious room
+log: You wake up in a mysterious room with a headache
+connects_to: 1
+time_to_complete: 3
+
+id: 1
+title: Look Around
+description: You see a wizard sleeping on the couch
+log: The wizard seems to be drunk and would not like being waken up as he is right now
+connects_to: 2,14
+time_to_complete: 3
+
+id: 2
+title: Search the room
+log: There is an empty bottle near the couch.
++ There is a bucket near the fireplace
++ The main door is locked by some magical barrier by the wizard.
++ There is another door which leads to the backyard which is open
+connects_to: 3,4,5,11
+time_to_complete: 5
+
+id: 3
+title: Take bottle
+log: You are now carrying a bottle
+add_to_inventory: bottle
+add_quantity: 1
+time_to_complete: 1
+
+id: 4
+title: Take bucket
+add_to_inventory: bucket
+add_quantity: 1
+log: You are now carrying an empty bucket
+time_to_complete: 1
+
+id: 5
+title: Go Outside
+description: Maybe there could be something in the backyard
+time_to_complete: 5
+connects_to: 6
+
+id: 6
+title: Look Around
+log: You are in an overgrown yard with weeds every where, there are some weird plants
++ it might be better not to touch them.
++ There is a well some way along the stony path.
++ There is a shed in one corner of the yard.
++ A frog that seems to be staring at you.
+time_to_complete: 5
+connects_to: 7,9
+
+id: 7
+title: Draw Water
+description: The well has water in it but I need a bucket
+log: I need a bucket
+connects_to: 8
+time_to_complete: 1
+
+id: 8
+title: Draw Water
+description: With the chain attached I can now lower the bucket in the well and draw water
+log: You now have a bucket filled with water
+requirement: welded-bucket
+add_to_inventory: filled-bucket
+add_quantity: 1
+remove_from_inventory: welded-bucket
+remove_quantity: 1
+time_to_complete: 1
+
+id: 9
+title: Search Shed
+description: A small wooden shed with gardening supplies
+log: There is an iron chain in the shed
+connects_to: 10
+time_to_complete: 2
+
+id: 10
+title: Take Iron Chain
+add_to_inventory: iron-chain
+add_quantity: 1
+log: You are now carrying an iron chain
+time_to_complete: 1
+
+id: 11
+title: Go to attic
+description: There is a small ladder leading to the attic. Maybe I should check out the attic
+connects_to: 12
+time_to_complete: 5
+
+id: 12
+title: Search attic
+description: You are in a small attic with many boxes
+log: There is a welding torch in the attic
+connects_to: 13
+time_to_complete: 1
+
+id: 13
+title: Weld
+description: The welding torch is blowing hot flames
+log: You weld the bucket to the chain
+requirement: bucket,iron-chain
+add_to_inventory: welded-bucket
+add_quantity: 1
+remove_from_inventory: bucket,iron-chain
+remove_quantity: 1
+time_to_complete: 1
+
+id: 14
+title: Wake the wizard
+log: You try waking him up. He seems to be annoyed.
+connects_to: 15,16
+time_to_complete: 3
+
+id: 15
+title: Wake him up anyway
+log: The wizard wakes up angry and turns you into a frog. Game over
+state_change_to: bad-ending
+time_to_complete: 1
+
+id: 16
+title: Splash water on him
+description: Maybe this might make him less angry
+requirement: filled-bucket
+log: The wizard wakes up. You chat about how you met him yesterday.
++ He remembers inviting you for a drink.
++ He removed the magical barrier on the door and you leave after saying your
++ thanks for hosting you. The end.
+state_change_to: good-ending
+time_to_complete: 3

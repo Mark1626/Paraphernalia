@@ -1,0 +1,9 @@
+[package]
+name = "wizard-adventure-inc"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+anyhow = "1.0.104"
+ratatui = "0.29"
+recutils-rs = { path = "../../recutil-tools/recutils-rs" }
