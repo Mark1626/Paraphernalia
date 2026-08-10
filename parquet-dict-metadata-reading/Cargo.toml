@@ -1,0 +1,9 @@
+[package]
+name = "parquet-dict-metadata-reading"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+anyhow = "1.0.104"
+arrow = "59.1.0"
+parquet = { version = "59.1.0", features = ["arrow", "experimental"] }
