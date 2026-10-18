@@ -138,6 +138,7 @@ Postgres Performance Studies and Benchmarks will be [here](https://github.com/Ma
 ### Parsers
 
 [S expr Parser](./s-parser/)
+[Rust Parser Combinators](./parser-combinator/)
 
 ---
 
